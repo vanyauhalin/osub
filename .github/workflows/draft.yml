@@ -1,0 +1,35 @@
+name: draft
+
+on: workflow_dispatch
+
+jobs:
+  draft:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install Homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+      - name: Install Tuist
+        run: |
+          curl -o tuist.rb https://raw.githubusercontent.com/vanyauhalin/homebrew/main/Formula/tuist.rb
+          brew install --build-from-source tuist.rb
+      - name: Install dependencies
+        run: make install
+      - name: Build
+        run: make build API_KEY=$API_KEY
+        env:
+          API_KEY: ${{ secrets.API_KEY }}
+      - name: Release
+        run: |
+          tar \
+            --directory .build/Release \
+            --file osub.tar.zst \
+            --use-compress-program zstd \
+            --create \
+            --verbose \
+            osub
+          gh release create v$(make version) --draft --generate-notes
+          gh release upload v$(make version) osub.tar.zst
+        env:
+          GH_TOKEN: ${{ github.token }}
