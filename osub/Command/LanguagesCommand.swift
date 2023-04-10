@@ -29,14 +29,16 @@ struct LanguagesCommand: AsyncParsableCommand {
     let languages = try await client.info.languages()
 
     var printer = TablePrinter()
-    printer.append("SUBTAG")
-    printer.append("NAME")
-    printer.end()
+    printer.append(Field(header: "subtag", truncatable: false))
+    printer.append(Field(header: "name"))
+    printer.next()
+
     languages.data.forEach { language in
       printer.append(language.languageCode)
       printer.append(language.languageName)
-      printer.end()
+      printer.next()
     }
+
     printer.print()
   }
 }

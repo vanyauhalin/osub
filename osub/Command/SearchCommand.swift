@@ -66,43 +66,43 @@ struct SearchSubtitlesCommand: AsyncParsableCommand {
     )
 
     var printer = TablePrinter()
+    printer.append(Field(header: "subtitles id", truncatable: false))
+    printer.append(Field(header: "release"))
+    printer.append(Field(header: "language", truncatable: false))
+    printer.append(Field(header: "uploaded"))
+    printer.append(Field(header: "downloads"))
+    printer.append(Field(header: "file id", truncatable: false))
+    printer.append(Field(header: "file name"))
+    printer.next()
+
+    subtitles.data.enumerated().forEach { index, entity in
+      func append() {
+        printer.append(entity.id)
+        printer.append(entity.attributes.release)
+        printer.append(entity.attributes.language)
+        printer.append(entity.attributes.uploadDate)
+        printer.append(entity.attributes.downloadCount)
+      }
+
+      if entity.attributes.files.isEmpty {
+        append()
+        printer.append("?")
+        printer.append("?")
+        printer.next()
+        return
+      }
+
+      entity.attributes.files.enumerated().forEach { index, file in
+        append()
+        printer.append(file.fileID)
+        printer.append(file.fileName)
+        printer.next()
+      }
+    }
+
     print()
     print("Printing \(subtitles.data.count) of \(subtitles.totalCount) subtitles.")
     print()
-    printer.append("SUBTITLES ID")
-    printer.append("RELEASE")
-    printer.append("LANGUAGE")
-    printer.append("UPLOADED")
-    printer.append("DOWNLOADS")
-    printer.append("FILE ID")
-    printer.append("FILE NAME")
-    printer.end()
-    subtitles.data.enumerated().forEach { index, entity in
-      if entity.attributes.files.isEmpty {
-        printer.append(entity.id)
-        printer.append(entity.attributes.release)
-        printer.append(entity.attributes.language)
-        printer.append(entity.attributes.uploadDate)
-        printer.append(entity.attributes.downloadCount)
-        if index != subtitles.data.count {
-          printer.end()
-        }
-        return
-      }
-      entity.attributes.files.enumerated().forEach { index, file in
-        printer.append(entity.id)
-        printer.append(entity.attributes.release)
-        printer.append(entity.attributes.language)
-        printer.append(entity.attributes.uploadDate)
-        printer.append(entity.attributes.downloadCount)
-        printer.append(file.fileID)
-        printer.append(file.fileName)
-        if index != entity.attributes.files.count {
-          printer.end()
-        }
-      }
-    }
-    printer.end()
     printer.print()
   }
 }

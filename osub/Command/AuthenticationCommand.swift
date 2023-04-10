@@ -227,12 +227,11 @@ struct AuthenticationStatusCommand: AsyncParsableCommand {
     self.user = user
 
     var printer = TablePrinter()
-    printer.append("USER ID")
-    printer.append("REMAINING DOWNLOADS")
-    printer.end()
+    printer.append(Field(header: "user id", truncatable: false))
+    printer.append(Field(header: "remaining downloads"))
+    printer.next()
     printer.append(user.data.userID)
     printer.append(user.data.remainingDownloads)
-    printer.end()
     printer.print()
   }
 }
