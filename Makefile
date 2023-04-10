@@ -61,8 +61,8 @@ install:
 lint: \
 	export PATH := $(PATH):/opt/homebrew/bin
 lint:
-	@if ! command -v tuist > /dev/null; then \
-		echo "Tuist is not installed, please visit https://tuist.io to see how to install it."; \
+	@if ! command -v swiftlint > /dev/null; then \
+		echo "warning: SwiftLint is not installed, please visit https://realm.github.io/SwiftLint to see how to install it."; \
 	else \
 		swiftlint lint \
 			--config $(MAKEFILE_DIR).swiftlint.yml \
