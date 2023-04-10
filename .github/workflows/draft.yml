@@ -12,8 +12,9 @@ jobs:
         uses: Homebrew/actions/setup-homebrew@master
       - name: Install Tuist
         run: |
-          curl -o tuist.rb https://raw.githubusercontent.com/vanyauhalin/homebrew/main/Formula/tuist.rb
-          brew install --build-from-source tuist.rb
+          brew tap vanyauhalin/tuist
+          brew install tuist
+          brew test tuist
       - name: Install dependencies
         run: make install
       - name: Build
