@@ -15,7 +15,7 @@ struct DownloadCommand: AsyncParsableCommand {
     name: .shortAndLong,
     help: ArgumentHelp(
       "The file ID from subtitles search results.",
-      valueName: "int"
+      valueName: .int
     )
   )
   var fileID: Int

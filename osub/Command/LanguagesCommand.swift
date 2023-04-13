@@ -61,5 +61,9 @@ extension LanguagesCommand {
         .name
       ]
     }
+
+    var text: String {
+      rawValue
+    }
   }
 }

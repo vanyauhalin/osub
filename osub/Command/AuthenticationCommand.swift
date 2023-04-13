@@ -256,6 +256,15 @@ extension AuthenticationStatusCommand {
         .remainingDownloads
       ]
     }
+
+    var text: String {
+      switch self {
+      case .remainingDownloads:
+        return "remaining_downloads"
+      case .userID:
+        return "user_id"
+      }
+    }
   }
 }
 
