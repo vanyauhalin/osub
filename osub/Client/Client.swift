@@ -64,12 +64,31 @@ public final class Client: ClientProtocol {
 
   public func url(path: String, with queryItems: [URLQueryItem]) throws -> URL {
     var url = try url(path: path)
+
     guard !queryItems.isEmpty else {
       return url.absoluteURL
     }
+
+    let queryItems: [URLQueryItem] =
+      [
+        // Crutch. Some items cannot be the first, so it is necessary to insert
+        // a dummy item at the beginning.
+        URLQueryItem(name: "&", value: nil)
+      ]
+      + queryItems.compactMap { queryItem in
+        guard let value = queryItem.value else {
+          return nil
+        }
+        return URLQueryItem(
+          name: queryItem.name,
+          value: value.replacingOccurrences(of: " ", with: "+")
+        )
+      }
+
     guard url.append2(queryItems: queryItems) else {
       throw ClientError.cannotCreateURL
     }
+
     return url.absoluteURL
   }
 

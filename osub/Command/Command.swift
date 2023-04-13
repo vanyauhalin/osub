@@ -32,3 +32,40 @@ extension ClientProtocol {
     )
   }
 }
+
+indirect enum ValueName {
+  case array(ValueName)
+  case `enum`
+  case int
+  case path
+  case string
+
+  var rawValue: String {
+    switch self {
+    case .array(let valueName):
+      return "[\(valueName.rawValue)]"
+    case .enum:
+      return "enum"
+    case .int:
+      return "int"
+    case .path:
+      return "path"
+    case .string:
+      return "string"
+    }
+  }
+}
+
+extension ArgumentHelp {
+  init(
+    _ abstract: String = "",
+    discussion: String = "",
+    valueName: ValueName? = nil
+  ) {
+    self.init(
+      abstract,
+      discussion: discussion,
+      valueName: valueName?.rawValue
+    )
+  }
+}

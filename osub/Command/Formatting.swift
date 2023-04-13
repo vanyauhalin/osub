@@ -3,6 +3,7 @@ import TablePrinter
 
 protocol FormattingField: RawRepresentable<String>, CaseIterable, ExpressibleByArgument {
   static var defaultValues: [Self] { get }
+  var text: String { get }
 }
 
 struct FormattingOptions<Field>: ParsableArguments where Field: FormattingField {
@@ -10,7 +11,7 @@ struct FormattingOptions<Field>: ParsableArguments where Field: FormattingField 
     parsing: .upToNextOption,
     help: ArgumentHelp(
       "Space-separated list of fields to print.",
-      discussion: "The list of available fields: \(Field.allValueStrings.joined(separator: ", "))."
+      valueName: .array(.enum)
     )
   )
   var fields = Field.defaultValues
@@ -18,10 +19,7 @@ struct FormattingOptions<Field>: ParsableArguments where Field: FormattingField 
   func printer() -> TablePrinter {
     var printer = TablePrinter()
     fields.forEach { field in
-      let header = field
-        .rawValue
-        .replacingOccurrences(of: "_", with: " ")
-        .uppercased()
+      let header = field.text.uppercased()
       printer.append(header)
     }
     printer.next()
