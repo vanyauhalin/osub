@@ -26,7 +26,7 @@ public protocol SearchServiceProtocol {
     type: SearchSubtitlesFeatureType?,
     userID: Int?,
     year: Int?
-  ) async throws -> PaginatedEntity<AttributedEntity<Subtitle>>
+  ) async throws -> PaginatedEntity<AttributedEntity<SubtitlesEntity>>
 }
 
 public final class SearchService: Service, SearchServiceProtocol {
@@ -39,9 +39,10 @@ public final class SearchService: Service, SearchServiceProtocol {
 
 // MARK: Subtitles
 
-public struct Subtitle {
+public struct SubtitlesEntity {
   public let aiTranslated: Bool?
   public let downloadCount: Int?
+  public let featureDetails: FeatureDetails?
   public let files: [File]
   public let foreignPartsOnly: Bool?
   public let fps: Double?
@@ -53,11 +54,13 @@ public struct Subtitle {
   public let ratings: Double?
   public let release: String?
   public let uploadDate: String?
+  public let uploader: Uploader?
   public let votes: Int?
 
   public init(
     aiTranslated: Bool? = nil,
     downloadCount: Int? = nil,
+    featureDetails: FeatureDetails? = nil,
     files: [File] = [],
     foreignPartsOnly: Bool? = nil,
     fps: Double? = nil,
@@ -69,10 +72,12 @@ public struct Subtitle {
     ratings: Double? = nil,
     release: String? = nil,
     uploadDate: String? = nil,
+    uploader: Uploader? = nil,
     votes: Int? = nil
   ) {
     self.aiTranslated = aiTranslated
     self.downloadCount = downloadCount
+    self.featureDetails = featureDetails
     self.files = files
     self.foreignPartsOnly = foreignPartsOnly
     self.fps = fps
@@ -84,14 +89,16 @@ public struct Subtitle {
     self.ratings = ratings
     self.release = release
     self.uploadDate = uploadDate
+    self.uploader = uploader
     self.votes = votes
   }
 }
 
-extension Subtitle: Codable {
+extension SubtitlesEntity: Codable {
   enum CodingKeys: String, CodingKey {
     case aiTranslated = "ai_translated"
     case downloadCount = "download_count"
+    case featureDetails = "feature_details"
     case files
     case foreignPartsOnly = "foreign_parts_only"
     case fps
@@ -103,6 +110,7 @@ extension Subtitle: Codable {
     case ratings
     case release
     case uploadDate = "upload_date"
+    case uploader
     case votes
   }
 
@@ -110,6 +118,8 @@ extension Subtitle: Codable {
     let container = try decoder.container(keyedBy: CodingKeys.self)
     self.aiTranslated = try container.decodeIfPresent(Bool.self, forKey: .aiTranslated)
     self.downloadCount = try container.decodeIfPresent(Int.self, forKey: .downloadCount)
+    // swiftlint:disable:next line_length
+    self.featureDetails = try container.decodeIfPresent(FeatureDetails.self, forKey: .featureDetails)
     self.files = (try container.decodeIfPresent([File].self, forKey: .files)) ?? []
     self.foreignPartsOnly = try container.decodeIfPresent(Bool.self, forKey: .foreignPartsOnly)
     self.fps = try container.decodeIfPresent(Double.self, forKey: .fps)
@@ -121,8 +131,79 @@ extension Subtitle: Codable {
     self.ratings = try container.decodeIfPresent(Double.self, forKey: .ratings)
     self.release = try container.decodeIfPresent(String.self, forKey: .release)
     self.uploadDate = try container.decodeIfPresent(String.self, forKey: .uploadDate)
+    self.uploader = try container.decodeIfPresent(Uploader.self, forKey: .uploader)
     self.votes = try container.decodeIfPresent(Int.self, forKey: .votes)
   }
+}
+
+public struct FeatureDetails {
+  public let episodeNumber: Int?
+  public let featureID: Int?
+  public let featureType: FeatureType?
+  public let imdbID: Int?
+  public let movieName: String?
+  public let parentFeatureID: Int?
+  public let parentIMDBID: Int?
+  public let parentTitle: String?
+  public let parentTMDBID: Int?
+  public let seasonNumber: Int?
+  public let title: String?
+  public let tmdbID: Int?
+  public let year: Int?
+
+  public init(
+    episodeNumber: Int? = nil,
+    featureID: Int? = nil,
+    featureType: FeatureType? = nil,
+    imdbID: Int? = nil,
+    movieName: String? = nil,
+    parentFeatureID: Int? = nil,
+    parentIMDBID: Int? = nil,
+    parentTitle: String? = nil,
+    parentTMDBID: Int? = nil,
+    seasonNumber: Int? = nil,
+    title: String? = nil,
+    tmdbID: Int? = nil,
+    year: Int? = nil
+  ) {
+    self.episodeNumber = episodeNumber
+    self.featureID = featureID
+    self.featureType = featureType
+    self.imdbID = imdbID
+    self.movieName = movieName
+    self.parentFeatureID = parentFeatureID
+    self.parentIMDBID = parentIMDBID
+    self.parentTitle = parentTitle
+    self.parentTMDBID = parentTMDBID
+    self.seasonNumber = seasonNumber
+    self.title = title
+    self.tmdbID = tmdbID
+    self.year = year
+  }
+}
+
+extension FeatureDetails: Codable {
+  enum CodingKeys: String, CodingKey {
+    case episodeNumber = "episode_number"
+    case featureID = "feature_id"
+    case featureType = "feature_type"
+    case imdbID = "imdb_id"
+    case movieName = "movie_name"
+    case parentFeatureID = "parent_feature_id"
+    case parentIMDBID = "parent_imdb_id"
+    case parentTitle = "parent_title"
+    case parentTMDBID = "parent_tmdb_id"
+    case seasonNumber = "season_number"
+    case title
+    case tmdbID = "tmdb_id"
+    case year
+  }
+}
+
+public enum FeatureType: String, Codable {
+  case episode = "Episode"
+  case movie = "Movie"
+  case tvshow = "Tvshow"
 }
 
 public struct File {
@@ -139,6 +220,30 @@ extension File: Codable {
   enum CodingKeys: String, CodingKey {
     case fileID = "file_id"
     case fileName = "file_name"
+  }
+}
+
+public struct Uploader {
+  public let name: String?
+  public let rank: String?
+  public let uploaderID: Int?
+
+  public init(
+    name: String? = nil,
+    rank: String? = nil,
+    uploaderID: Int? = nil
+  ) {
+    self.name = name
+    self.rank = rank
+    self.uploaderID = uploaderID
+  }
+}
+
+extension Uploader: Codable {
+  enum CodingKeys: String, CodingKey {
+    case name
+    case rank
+    case uploaderID = "uploader_id"
   }
 }
 
@@ -228,7 +333,7 @@ extension SearchService {
     type: SearchSubtitlesFeatureType? = nil,
     userID: Int? = nil,
     year: Int? = nil
-  ) async throws -> PaginatedEntity<AttributedEntity<Subtitle>> {
+  ) async throws -> PaginatedEntity<AttributedEntity<SubtitlesEntity>> {
     let client = try refer()
 
     var queryItems: [URLQueryItem] = []
@@ -307,7 +412,7 @@ extension SearchService {
       .request(url: url)
       .httpMethod(.get)
     return try await client.entity(
-      PaginatedEntity<AttributedEntity<Subtitle>>.self,
+      PaginatedEntity<AttributedEntity<SubtitlesEntity>>.self,
       from: request
     )
   }
