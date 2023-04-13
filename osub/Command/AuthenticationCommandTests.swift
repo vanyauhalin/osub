@@ -23,7 +23,7 @@ final class AuthenticationLoginCommandTests: XCTestCase {
     command.client = MockedClient(
       auth: MockedAuthenticationService(
         login: {
-          Login(
+          LoginEntity(
             baseURL: URL(string: "http://localhost/"),
             token: "www"
           )
@@ -57,7 +57,7 @@ final class AuthenticationCommandLogoutTests: XCTestCase {
     command.client = MockedClient(
       auth: MockedAuthenticationService(
         logout: {
-          Information(
+          InformationEntity(
             message: "jackpot"
           )
         }
@@ -108,7 +108,7 @@ final class AuthenticationRefreshCommandTests: XCTestCase {
     command.client = MockedClient(
       auth: MockedAuthenticationService(
         login: {
-          Login(
+          LoginEntity(
             baseURL: URL(string: "http://localhost/"),
             token: "www"
           )
@@ -138,7 +138,7 @@ final class AuthenticationCommandStatusTests: XCTestCase {
       info: MockedInformationService(
         user: {
           DatumedEntity(
-            data: User(
+            data: UserEntity(
               userID: 9000,
               remainingDownloads: 20
             )

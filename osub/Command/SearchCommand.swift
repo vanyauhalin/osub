@@ -63,8 +63,29 @@ struct SearchSubtitlesCommand: AsyncParsableCommand {
       hash = try Hash.hash(of: file)
     }
     let subtitles = try await client.search.subtitles(
+      aiTranslated: nil,
+      episodeNumber: nil,
+      foreignPartsOnly: nil,
+      hearingImpaired: nil,
+      id: nil,
+      imdbID: nil,
+      languages: languages,
+      machineTranslated: nil,
+      moviehashMatch: nil,
       moviehash: hash,
-      languages: languages
+      orderBy: nil,
+      orderDirection: nil,
+      page: nil,
+      parentFeatureID: nil,
+      parentIMDBID: nil,
+      parentTMDBID: nil,
+      query: nil,
+      seasonNumber: nil,
+      tmdbID: nil,
+      trustedSources: nil,
+      type: nil,
+      userID: nil,
+      year: nil
     )
 
     var printer = formatting.printer()

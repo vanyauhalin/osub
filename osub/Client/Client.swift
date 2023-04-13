@@ -63,9 +63,11 @@ public final class Client: ClientProtocol {
   }
 
   public func url(path: String, with queryItems: [URLQueryItem]) throws -> URL {
-    guard
-      let url = try url(path: path).appending2(queryItems: queryItems)
-    else {
+    var url = try url(path: path)
+    guard !queryItems.isEmpty else {
+      return url.absoluteURL
+    }
+    guard url.append2(queryItems: queryItems) else {
       throw ClientError.cannotCreateURL
     }
     return url.absoluteURL
@@ -95,7 +97,7 @@ public final class Client: ClientProtocol {
     }
     let statusCode = (response as? HTTPURLResponse)?.statusCode
     let status = HTTPStatus(rawValue: statusCode ?? .zero)
-    let info = try? decoder.decode(Information.self, from: data)
+    let info = try? decoder.decode(InformationEntity.self, from: data)
     throw ClientError.cannotDecodeEntity(status, info)
   }
 }
@@ -106,7 +108,7 @@ enum ClientError: Error {
   case clientUnavailable
   case cannotCreateURL
   case cannotDecodeProperty
-  case cannotDecodeEntity(HTTPStatus?, Information?)
+  case cannotDecodeEntity(HTTPStatus?, InformationEntity?)
 }
 
 extension ClientError: CustomStringConvertible {
@@ -123,8 +125,8 @@ extension ClientError: CustomStringConvertible {
       if let status {
         description += "\n\(status)."
       }
-      if let info {
-        description += "\n\(info.message)"
+      if let message = info?.message {
+        description += "\n\(message)"
       }
       return description
     }
@@ -148,6 +150,10 @@ extension Bundle {
 extension URLQueryItem {
   init(name: String, value: Int) {
     self.init(name: name, value: String(value))
+  }
+
+  init<T>(name: String, value: T) where T: RawRepresentable<String> {
+    self.init(name: name, value: value.rawValue)
   }
 }
 

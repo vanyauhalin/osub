@@ -38,10 +38,8 @@ public struct AttributedEntity<T>: Decodable where T: Decodable {
   public init(from decoder: Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
     self.id = try {
-      guard
-        let string = try? container.decode(String.self, forKey: .id),
-        let int = Int(string)
-      else {
+      let string = try container.decode(String.self, forKey: .id)
+      guard let int = Int(string) else {
         throw ClientError.cannotDecodeProperty
       }
       return int
@@ -65,10 +63,10 @@ public struct PaginatedEntity<T>: Decodable where T: Decodable {
   }
 }
 
-public struct Information: Decodable {
-  public let message: String
+public struct InformationEntity: Decodable {
+  public let message: String?
 
-  public init(message: String) {
+  public init(message: String? = nil) {
     self.message = message
   }
 }

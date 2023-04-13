@@ -71,25 +71,25 @@ public final class MockedClient: ClientProtocol {
 }
 
 public final class MockedAuthenticationService: AuthenticationServiceProtocol {
-  let mockedLogin: (() throws -> Login)?
-  let mockedLogout: (() throws -> Information)?
+  let mockedLogin: (() throws -> LoginEntity)?
+  let mockedLogout: (() throws -> InformationEntity)?
 
   public init(
-    login: (() throws -> Login)? = nil,
-    logout: (() throws -> Information)? = nil
+    login: (() throws -> LoginEntity)? = nil,
+    logout: (() throws -> InformationEntity)? = nil
   ) {
     self.mockedLogin = login
     self.mockedLogout = logout
   }
 
-  public func login(username: String, password: String) async throws -> Login {
+  public func login(username: String, password: String) async throws -> LoginEntity {
     guard let mockedLogin else {
       fatalError("The \(#function) is not implemented.")
     }
     return try mockedLogin()
   }
 
-  public func logout() async throws -> Information {
+  public func logout() async throws -> InformationEntity {
     guard let mockedLogout else {
       fatalError("The \(#function) is not implemented.")
     }
@@ -98,25 +98,25 @@ public final class MockedAuthenticationService: AuthenticationServiceProtocol {
 }
 
 public final class MockedInformationService: InformationServiceProtocol {
-  public let mockedLanguages: (() throws -> DatumedEntity<[Language]>)?
-  public let mockedUser: (() throws -> DatumedEntity<User>)?
+  public let mockedLanguages: (() throws -> DatumedEntity<[LanguageEntity]>)?
+  public let mockedUser: (() throws -> DatumedEntity<UserEntity>)?
 
   public init(
-    languages: (() throws -> DatumedEntity<[Language]>)? = nil,
-    user: (() throws -> DatumedEntity<User>)? = nil
+    languages: (() throws -> DatumedEntity<[LanguageEntity]>)? = nil,
+    user: (() throws -> DatumedEntity<UserEntity>)? = nil
   ) {
     self.mockedLanguages = languages
     self.mockedUser = user
   }
 
-  public func languages() async throws -> DatumedEntity<[Language]> {
+  public func languages() async throws -> DatumedEntity<[LanguageEntity]> {
     guard let mockedLanguages else {
       fatalError("The \(#function) is not implemented.")
     }
     return try mockedLanguages()
   }
 
-  public func user() async throws -> DatumedEntity<User> {
+  public func user() async throws -> DatumedEntity<UserEntity> {
     guard let mockedUser else {
       fatalError("The \(#function) is not implemented.")
     }

@@ -1,8 +1,8 @@
 import Foundation
 
 public protocol InformationServiceProtocol {
-  func languages() async throws -> DatumedEntity<[Language]>
-  func user() async throws -> DatumedEntity<User>
+  func languages() async throws -> DatumedEntity<[LanguageEntity]>
+  func user() async throws -> DatumedEntity<UserEntity>
 }
 
 public final class InformationService: Service, InformationServiceProtocol {
@@ -15,17 +15,17 @@ public final class InformationService: Service, InformationServiceProtocol {
 
 // MARK: Language
 
-public struct Language {
-  public let languageCode: String
-  public let languageName: String
+public struct LanguageEntity {
+  public let languageCode: String?
+  public let languageName: String?
 
-  public init(languageCode: String, languageName: String) {
+  public init(languageCode: String? = nil, languageName: String? = nil) {
     self.languageCode = languageCode
     self.languageName = languageName
   }
 }
 
-extension Language: Decodable {
+extension LanguageEntity: Decodable {
   enum CodingKeys: String, CodingKey {
     case languageCode = "language_code"
     case languageName = "language_name"
@@ -33,14 +33,14 @@ extension Language: Decodable {
 }
 
 extension InformationService {
-  public func languages() async throws -> DatumedEntity<[Language]> {
+  public func languages() async throws -> DatumedEntity<[LanguageEntity]> {
     let client = try refer()
     let url = try client.url(path: "infos/languages")
     let request = client
       .request(url: url)
       .httpMethod(.get)
     return try await client.entity(
-      DatumedEntity<[Language]>.self,
+      DatumedEntity<[LanguageEntity]>.self,
       from: request
     )
   }
@@ -48,17 +48,17 @@ extension InformationService {
 
 // MARK: User
 
-public struct User {
-  public let userID: Int
-  public let remainingDownloads: Int
+public struct UserEntity {
+  public let userID: Int?
+  public let remainingDownloads: Int?
 
-  public init(userID: Int, remainingDownloads: Int) {
+  public init(userID: Int? = nil, remainingDownloads: Int? = nil) {
     self.userID = userID
     self.remainingDownloads = remainingDownloads
   }
 }
 
-extension User: Decodable {
+extension UserEntity: Decodable {
   enum CodingKeys: String, CodingKey {
     case userID = "user_id"
     case remainingDownloads = "remaining_downloads"
@@ -66,14 +66,14 @@ extension User: Decodable {
 }
 
 extension InformationService {
-  public func user() async throws -> DatumedEntity<User> {
+  public func user() async throws -> DatumedEntity<UserEntity> {
     let client = try refer()
     let url = try client.url(path: "infos/user")
     let request = client
       .request(url: url)
       .httpMethod(.get)
     return try await client.entity(
-      DatumedEntity<User>.self,
+      DatumedEntity<UserEntity>.self,
       from: request
     )
   }
