@@ -211,7 +211,7 @@ struct AuthenticationStatusCommand: AsyncParsableCommand {
   var stateManager: StateManagerProtocol = StateManager.shared
   var client: ClientProtocol = Client.shared
 
-  var user: DatumedEntity<User>?
+  var user: DatumedEntity<UserEntity>?
 
   mutating func run() async throws {
     try configure()

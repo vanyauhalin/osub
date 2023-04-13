@@ -1,6 +1,7 @@
 public struct TablePrinter {
-  static private let delimiter = "  "
-  static private let ellipsis = "..."
+  private static let delimiter = "  "
+  private static let ellipsis = "..."
+  private static let null = "?"
 
   private let window: WindowProtocol
 
@@ -10,13 +11,24 @@ public struct TablePrinter {
     self.window = window
   }
 
-  public mutating func append(_ field: String) {
+  mutating func append(_ field: String) {
     rows[rows.count - 1].append(field)
   }
 
-  public mutating func append(_ number: Int) {
-    let text = String(number)
-    append(text)
+  public mutating func append(_ field: String? = nil) {
+    guard let field else {
+      append(TablePrinter.null)
+      return
+    }
+    append(field)
+  }
+
+  public mutating func append<T>(_ field: T? = nil) where T: LosslessStringConvertible {
+    guard let field else {
+      append(TablePrinter.null)
+      return
+    }
+    append(String(field))
   }
 
   public mutating func next() {

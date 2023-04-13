@@ -1,8 +1,8 @@
 import Foundation
 
 public protocol AuthenticationServiceProtocol {
-  func login(username: String, password: String) async throws -> Login
-  func logout() async throws -> Information
+  func login(username: String, password: String) async throws -> LoginEntity
+  func logout() async throws -> InformationEntity
 }
 
 public final class AuthenticationService: Service, AuthenticationServiceProtocol {
@@ -15,17 +15,17 @@ public final class AuthenticationService: Service, AuthenticationServiceProtocol
 
 // MARK: Login
 
-public struct Login {
+public struct LoginEntity {
   public let baseURL: URL?
-  public let token: String
+  public let token: String?
 
-  public init(baseURL: URL? = nil, token: String) {
+  public init(baseURL: URL? = nil, token: String? = nil) {
     self.baseURL = baseURL
     self.token = token
   }
 }
 
-extension Login: Decodable {
+extension LoginEntity: Decodable {
   enum CodingKeys: String, CodingKey {
     case baseURL = "base_url"
     case token
@@ -44,7 +44,7 @@ extension Login: Decodable {
 }
 
 extension AuthenticationService {
-  public func login(username: String, password: String) async throws -> Login {
+  public func login(username: String, password: String) async throws -> LoginEntity {
     let client = try refer()
     let url = try client.url(path: "login")
     let request = client
@@ -54,19 +54,19 @@ extension AuthenticationService {
         "username": username,
         "password": password
       ])
-    return try await client.entity(Login.self, from: request)
+    return try await client.entity(LoginEntity.self, from: request)
   }
 }
 
 // MARK: Logout
 
 extension AuthenticationService {
-  public func logout() async throws -> Information {
+  public func logout() async throws -> InformationEntity {
     let client = try refer()
     let url = try client.url(path: "logout")
     let request = client
       .request(url: url)
       .httpMethod(.delete)
-    return try await client.entity(Information.self, from: request)
+    return try await client.entity(InformationEntity.self, from: request)
   }
 }

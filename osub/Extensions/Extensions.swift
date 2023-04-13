@@ -9,37 +9,39 @@ extension URL {
     }
   }
 
-  public func appending2(queryItems: [URLQueryItem]) -> Self? {
+  public mutating func append2(queryItems: [URLQueryItem]) -> Bool {
     if #available(macOS 13.0, *) {
-      return self.appending(queryItems: queryItems)
+      append(queryItems: queryItems)
+      return true
     }
     var components = URLComponents(url: self, resolvingAgainstBaseURL: true)
     components?.queryItems = queryItems
-    return components?.url
+    guard let url = components?.url else {
+      return false
+    }
+    self = url
+    return true
   }
 
   public func appending2(path: String) -> URL {
     if #available(macOS 13, *) {
       return appending(path: path)
-    } else {
-      return appendingPathComponent(path)
     }
+    return appendingPathComponent(path)
   }
 
   public func appending2(path: String, isDirectory: Bool) -> URL {
     if #available(macOS 13, *) {
       return appending(path: path, directoryHint: .isDirectory)
-    } else {
-      return appendingPathComponent(path, isDirectory: isDirectory)
     }
+    return appendingPathComponent(path, isDirectory: isDirectory)
   }
 
   public func path2() -> String {
     if #available(macOS 13, *) {
       return path()
-    } else {
-      return path
     }
+    return path
   }
 }
 

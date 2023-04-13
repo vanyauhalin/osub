@@ -5,7 +5,7 @@ import XCTest
 
 final class SearchServiceTests: URLProtocolTestCase {
   func testSubtitles() async throws {
-    let url = URL(string: "http://localhost/subtitles?moviehash=&languages=")
+    let url = URL(string: "http://localhost/subtitles")
     let data = """
       {
         "total_count": 1,
@@ -35,7 +35,7 @@ final class SearchServiceTests: URLProtocolTestCase {
     let client = Client(session: MockedURLProtocol.session)
     client.configure(baseURL: URL(string: "http://localhost/"))
     let service = SearchService(client: client)
-    let subtitles = try await service.subtitles(moviehash: "", languages: "")
+    let subtitles = try await service.subtitles()
     XCTAssertEqual(subtitles.totalCount, 1)
     XCTAssertEqual(subtitles.data[0].id, 9000)
     XCTAssertEqual(subtitles.data[0].attributes.downloadCount, 20)

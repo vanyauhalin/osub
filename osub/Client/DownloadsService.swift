@@ -1,7 +1,7 @@
 import Foundation
 
 public protocol DownloadsServiceProtocol {
-  func post(fileID: Int) async throws -> Download
+  func post(fileID: Int) async throws -> DownloadEntity
 }
 
 public final class DownloadsService: Service, DownloadsServiceProtocol {
@@ -14,7 +14,7 @@ public final class DownloadsService: Service, DownloadsServiceProtocol {
 
 // MARK: Download
 
-public struct Download {
+public struct DownloadEntity {
   public let link: URL?
 
   public init(link: URL? = nil) {
@@ -22,7 +22,7 @@ public struct Download {
   }
 }
 
-extension Download: Decodable {
+extension DownloadEntity: Decodable {
   enum CodingKeys: String, CodingKey {
     case link
   }
@@ -37,7 +37,7 @@ extension Download: Decodable {
 }
 
 extension DownloadsService {
-  public func post(fileID: Int) async throws -> Download {
+  public func post(fileID: Int) async throws -> DownloadEntity {
     let client = try refer()
     let url = try client.url(path: "download")
     let request = client
@@ -46,6 +46,6 @@ extension DownloadsService {
       .httpBody([
         "file_id": fileID
       ])
-    return try await client.entity(Download.self, from: request)
+    return try await client.entity(DownloadEntity.self, from: request)
   }
 }
