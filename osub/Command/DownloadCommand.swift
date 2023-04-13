@@ -49,7 +49,7 @@ struct DownloadCommand: AsyncParsableCommand {
 }
 
 extension DownloadCommand {
-  enum CodingKeys: String, CodingKey {
+  enum CodingKeys: CodingKey {
     case fileID
   }
 }
