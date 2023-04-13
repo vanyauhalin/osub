@@ -2,13 +2,15 @@ import ArgumentParser
 import Client
 import Configuration
 import State
-import TablePrinter
 
 struct LanguagesCommand: AsyncParsableCommand {
   static let configuration = CommandConfiguration(
     commandName: "languages",
     abstract: "Print a list of languages for subtitles."
   )
+
+  @OptionGroup(title: "Formatting Options")
+  var formatting: FormattingOptions<Field>
 
   var configManager: ConfigurationManagerProtocol = ConfigurationManager.shared
   var stateManager: StateManagerProtocol = StateManager.shared
@@ -28,21 +30,36 @@ struct LanguagesCommand: AsyncParsableCommand {
   mutating func action() async throws {
     let languages = try await client.info.languages()
 
-    var printer = TablePrinter()
-    printer.append(Field(header: "subtag", truncatable: false))
-    printer.append(Field(header: "name"))
-    printer.next()
-
+    var printer = formatting.printer()
     languages.data.forEach { language in
-      printer.append(language.languageCode)
-      printer.append(language.languageName)
+      formatting.fields.forEach { field in
+        switch field {
+        case .name:
+          printer.append(language.languageName)
+        case .subtag:
+          printer.append(language.languageCode)
+        }
+      }
       printer.next()
     }
-
     printer.print()
   }
 }
 
 extension LanguagesCommand {
-  init(from decoder: Decoder) throws {}
+  enum CodingKeys: CodingKey {
+    case formatting
+  }
+
+  enum Field: String, FormattingField {
+    case name
+    case subtag
+
+    static var defaultValues: [Self] {
+      [
+        .subtag,
+        .name
+      ]
+    }
+  }
 }

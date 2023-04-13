@@ -3,7 +3,6 @@ import Client
 import Configuration
 import Hash
 import State
-import TablePrinter
 
 struct SearchCommand: AsyncParsableCommand {
   static let configuration = CommandConfiguration(
@@ -40,6 +39,9 @@ struct SearchSubtitlesCommand: AsyncParsableCommand {
   )
   var languages: String?
 
+  @OptionGroup(title: "Formatting Options")
+  var formatting: FormattingOptions<Field>
+
   var configManager: ConfigurationManagerProtocol = ConfigurationManager.shared
   var stateManager: StateManagerProtocol = StateManager.shared
   var client: ClientProtocol = Client.shared
@@ -65,37 +67,50 @@ struct SearchSubtitlesCommand: AsyncParsableCommand {
       languages: languages
     )
 
-    var printer = TablePrinter()
-    printer.append(Field(header: "subtitles id", truncatable: false))
-    printer.append(Field(header: "release"))
-    printer.append(Field(header: "language", truncatable: false))
-    printer.append(Field(header: "uploaded"))
-    printer.append(Field(header: "downloads"))
-    printer.append(Field(header: "file id", truncatable: false))
-    printer.append(Field(header: "file name"))
-    printer.next()
-
-    subtitles.data.enumerated().forEach { index, entity in
-      func append() {
-        printer.append(entity.id)
-        printer.append(entity.attributes.release)
-        printer.append(entity.attributes.language)
-        printer.append(entity.attributes.uploadDate)
-        printer.append(entity.attributes.downloadCount)
-      }
-
+    var printer = formatting.printer()
+    subtitles.data.forEach { entity in
       if entity.attributes.files.isEmpty {
-        append()
-        printer.append("?")
-        printer.append("?")
+        formatting.fields.forEach { field in
+          switch field {
+          case .downloads:
+            printer.append(entity.attributes.downloadCount)
+          case .fileID:
+            printer.append("?")
+          case .fileName:
+            printer.append("?")
+          case .language:
+            printer.append(entity.attributes.language)
+          case .release:
+            printer.append(entity.attributes.release)
+          case .subtitlesID:
+            printer.append(entity.id)
+          case .uploaded:
+            printer.append(entity.attributes.uploadDate)
+          }
+        }
         printer.next()
         return
       }
 
-      entity.attributes.files.enumerated().forEach { index, file in
-        append()
-        printer.append(file.fileID)
-        printer.append(file.fileName)
+      entity.attributes.files.forEach { file in
+        formatting.fields.forEach { field in
+          switch field {
+          case .downloads:
+            printer.append(entity.attributes.downloadCount)
+          case .fileID:
+            printer.append(file.fileID)
+          case .fileName:
+            printer.append(file.fileName)
+          case .language:
+            printer.append(entity.attributes.language)
+          case .release:
+            printer.append(entity.attributes.release)
+          case .subtitlesID:
+            printer.append(entity.id)
+          case .uploaded:
+            printer.append(entity.attributes.uploadDate)
+          }
+        }
         printer.next()
       }
     }
@@ -111,5 +126,27 @@ extension SearchSubtitlesCommand {
   enum CodingKeys: String, CodingKey {
     case file
     case languages
+    case formatting
+  }
+
+  enum Field: String, FormattingField {
+    case downloads
+    case fileID = "file_id"
+    case fileName = "file_name"
+    case language
+    case release
+    case subtitlesID = "subtitles_id"
+    case uploaded
+
+    static var defaultValues: [Self] {
+      [
+        .fileID,
+        .fileName,
+        .language,
+        .uploaded,
+        .downloads,
+        .subtitlesID
+      ]
+    }
   }
 }
