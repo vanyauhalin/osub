@@ -31,6 +31,10 @@ public struct TablePrinter {
     append(String(field))
   }
 
+  public mutating func append<T>(_ field: T? = nil) where T: RawRepresentable<String> {
+    append(field?.rawValue)
+  }
+
   public mutating func next() {
     rows.append([])
   }

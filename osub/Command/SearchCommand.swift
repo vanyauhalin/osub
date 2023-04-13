@@ -97,13 +97,19 @@ struct SearchSubtitlesCommand: AsyncParsableCommand {
     var printer = formatting.printer()
 
     // swiftlint:disable:next cyclomatic_complexity
-    func resolve(entity: AttributedEntity<Subtitle>, file: File? = nil) {
+    func resolve(entity: AttributedEntity<SubtitlesEntity>, file: File? = nil) {
       formatting.fields.forEach { field in
         switch field {
         case .aiTranslated:
           printer.append(entity.attributes.aiTranslated)
         case .downloadCount:
           printer.append(entity.attributes.downloadCount)
+        case .episodeNumber:
+          printer.append(entity.attributes.featureDetails?.episodeNumber)
+        case .featureID:
+          printer.append(entity.attributes.featureDetails?.featureID)
+        case .featureType:
+          printer.append(entity.attributes.featureDetails?.featureType)
         case .fileID:
           printer.append(file?.fileID)
         case .fileName:
@@ -120,18 +126,44 @@ struct SearchSubtitlesCommand: AsyncParsableCommand {
           printer.append(entity.attributes.hearingImpaired)
         case .id:
           printer.append(entity.id)
+        case .imdbID:
+          printer.append(entity.attributes.featureDetails?.imdbID)
         case .language:
           printer.append(entity.attributes.language)
         case .machineTranslated:
           printer.append(entity.attributes.machineTranslated)
+        case .movieName:
+          printer.append(entity.attributes.featureDetails?.movieName)
+        case .parentFeatureID:
+          printer.append(entity.attributes.featureDetails?.parentFeatureID)
+        case .parentIMDBID:
+          printer.append(entity.attributes.featureDetails?.parentIMDBID)
+        case .parentTitle:
+          printer.append(entity.attributes.featureDetails?.parentTitle)
+        case .parentTMDBID:
+          printer.append(entity.attributes.featureDetails?.parentTMDBID)
         case .ratings:
           printer.append(entity.attributes.ratings)
         case .release:
           printer.append(entity.attributes.release)
+        case .seasonNumber:
+          printer.append(entity.attributes.featureDetails?.seasonNumber)
+        case .title:
+          printer.append(entity.attributes.featureDetails?.title)
+        case .tmdbID:
+          printer.append(entity.attributes.featureDetails?.tmdbID)
+        case .uploaderID:
+          printer.append(entity.attributes.uploader?.uploaderID)
+        case .uploaderName:
+          printer.append(entity.attributes.uploader?.name)
+        case .uploaderRank:
+          printer.append(entity.attributes.uploader?.rank)
         case .uploadDate:
           printer.append(entity.attributes.uploadDate)
         case .votes:
           printer.append(entity.attributes.votes)
+        case .year:
+          printer.append(entity.attributes.featureDetails?.year)
         }
       }
     }
@@ -152,7 +184,7 @@ struct SearchSubtitlesCommand: AsyncParsableCommand {
     // The documentation says 60, but in reality it's 50.
     let perPage = 50
     let page = query.page ?? 1
-    let pages = (Double(total) / Double(perPage)).rounded(.awayFromZero)
+    let pages = Int((Double(total) / Double(perPage)).rounded(.awayFromZero))
 
     print()
     print("Printing \(page) page of \(pages) for \(total) subtitles.")
@@ -381,6 +413,9 @@ extension SearchSubtitlesCommand {
 
     case aiTranslated = "ai_translated"
     case downloadCount = "download_count"
+    case episodeNumber = "episode_number"
+    case featureID = "feature_id"
+    case featureType = "feature_type"
     case fileID = "file_id"
     case fileName = "file_name"
     case foreignPartsOnly = "foreign_parts_only"
@@ -389,12 +424,25 @@ extension SearchSubtitlesCommand {
     case hd
     case hearingImpaired = "hearing_impaired"
     case id
+    case imdbID = "imdb_id"
     case language
     case machineTranslated = "machine_translated"
+    case movieName = "movie_name"
+    case parentFeatureID = "parent_feature_id"
+    case parentIMDBID = "parent_imdb_id"
+    case parentTitle = "parent_title"
+    case parentTMDBID = "parent_tmdb_id"
     case ratings
     case release
+    case seasonNumber = "season_number"
+    case title
+    case tmdbID = "tmdb_id"
     case uploadDate = "upload_date"
+    case uploaderID = "uploader_id"
+    case uploaderName = "uploader_name"
+    case uploaderRank = "uploader_rank"
     case votes
+    case year
 
     var text: String {
       switch self {
@@ -402,6 +450,12 @@ extension SearchSubtitlesCommand {
         return "AI-translated"
       case .downloadCount:
         return "downloads"
+      case .episodeNumber:
+        return "episode number"
+      case .featureID:
+        return "feature id"
+      case .featureType:
+        return "feature type"
       case .fileID:
         return "file id"
       case .fileName:
@@ -418,17 +472,43 @@ extension SearchSubtitlesCommand {
         return "hearing impaired"
       case .id:
         return "subtitles id"
+      case .imdbID:
+        return "imdb id"
       case .language:
         return rawValue
       case .machineTranslated:
         return "machine-translated"
+      case .movieName:
+        return "movie name"
+      case .parentFeatureID:
+        return "parent feature id"
+      case .parentIMDBID:
+        return "parent imdb id"
+      case .parentTitle:
+        return "parent title"
+      case .parentTMDBID:
+        return "parent tmdb id"
       case .ratings:
         return rawValue
       case .release:
         return rawValue
+      case .seasonNumber:
+        return "season number"
+      case .title:
+        return rawValue
+      case .tmdbID:
+        return "tmdb id"
       case .uploadDate:
         return "uploaded"
+      case .uploaderID:
+        return "uploader id"
+      case .uploaderName:
+        return "uploader name"
+      case .uploaderRank:
+        return "uploader rank"
       case .votes:
+        return rawValue
+      case .year:
         return rawValue
       }
     }
