@@ -3,7 +3,6 @@ import Client
 import Configuration
 import Listable
 import State
-import TablePrinter
 
 struct AuthenticationCommand: AsyncParsableCommand {
   static let configuration = CommandConfiguration(
@@ -205,6 +204,9 @@ struct AuthenticationStatusCommand: AsyncParsableCommand {
     abstract: "Print authentication status."
   )
 
+  @OptionGroup(title: "Formatting Options")
+  var formatting: FormattingOptions<Field>
+
   var configManager: ConfigurationManagerProtocol = ConfigurationManager.shared
   var stateManager: StateManagerProtocol = StateManager.shared
   var client: ClientProtocol = Client.shared
@@ -226,18 +228,35 @@ struct AuthenticationStatusCommand: AsyncParsableCommand {
     let user = try await client.info.user()
     self.user = user
 
-    var printer = TablePrinter()
-    printer.append(Field(header: "user id", truncatable: false))
-    printer.append(Field(header: "remaining downloads"))
-    printer.next()
-    printer.append(user.data.userID)
-    printer.append(user.data.remainingDownloads)
+    var printer = formatting.printer()
+    formatting.fields.forEach { field in
+      switch field {
+      case .remainingDownloads:
+        printer.append(user.data.remainingDownloads)
+      case .userID:
+        printer.append(user.data.userID)
+      }
+    }
     printer.print()
   }
 }
 
 extension AuthenticationStatusCommand {
-  init(from decoder: Decoder) throws {}
+  enum CodingKeys: CodingKey {
+    case formatting
+  }
+
+  enum Field: String, FormattingField {
+    case remainingDownloads = "remaining_downloads"
+    case userID = "user_id"
+
+    static var defaultValues: [Self] {
+      [
+        .userID,
+        .remainingDownloads
+      ]
+    }
+  }
 }
 
 // MARK: Error

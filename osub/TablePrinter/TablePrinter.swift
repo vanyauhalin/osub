@@ -1,36 +1,17 @@
-public struct Field {
-  public let text: String
-  public let truncatable: Bool
-
-  public init(text: String, truncatable: Bool = true) {
-    self.text = text
-    self.truncatable = truncatable
-  }
-
-  public init(header: String, truncatable: Bool = true) {
-    self.text = header.uppercased()
-    self.truncatable = truncatable
-  }
-}
-
 public struct TablePrinter {
-  private let window: WindowProtocol
-  private let delimiter = "  "
-  private let ellipsis = "..."
+  static private let delimiter = "  "
+  static private let ellipsis = "..."
 
-  var rows: [[Field]] = [[]]
+  private let window: WindowProtocol
+
+  var rows: [[String]] = [[]]
 
   public init(window: WindowProtocol = Window.shared) {
     self.window = window
   }
 
-  public mutating func append(_ field: Field) {
+  public mutating func append(_ field: String) {
     rows[rows.count - 1].append(field)
-  }
-
-  public mutating func append(_ text: String) {
-    let field = Field(text: text)
-    append(field)
   }
 
   public mutating func append(_ number: Int) {
@@ -47,9 +28,9 @@ public struct TablePrinter {
     rows.enumerated().forEach { index, row in
       row.enumerated().forEach { column, field in
         let columnWidth = columnsWidths[column]
-        let text = field.text.count > columnWidth && field.truncatable
-          ? field.text.prefix(columnWidth - ellipsis.count) + ellipsis
-          : field.text
+        let text = field.count > columnWidth
+          ? field.prefix(columnWidth - TablePrinter.ellipsis.count) + TablePrinter.ellipsis
+          : field
         let spaceCount = columnWidth - text.count
         let space = spaceCount >= 0
           ? String(repeating: " ", count: spaceCount)
@@ -58,7 +39,7 @@ public struct TablePrinter {
           Swift.print("\(text)\(space)", terminator: "")
           return
         }
-        Swift.print("\(text)\(space)\(delimiter)", terminator: "")
+        Swift.print("\(text)\(space)\(TablePrinter.delimiter)", terminator: "")
       }
       if index != rows.count - 1 {
         Swift.print()
@@ -74,19 +55,16 @@ public struct TablePrinter {
 
     rows.forEach { row in
       row.enumerated().forEach { column, field in
-        let width = field.text.count
+        let width = field.count
         if width > maximumColumnsWidths[column] {
           maximumColumnsWidths[column] = width
-        }
-        if !field.truncatable, width > columnsWidths[column] {
-          columnsWidths[column] = width
         }
       }
     }
 
     func availableWidth() -> Int {
       window.columns
-        - delimiter.count * (countColumns - 1)
+        - TablePrinter.delimiter.count * (countColumns - 1)
         - columnsWidths.reduce(Int.zero) { result, width  in
           result + width
         }
