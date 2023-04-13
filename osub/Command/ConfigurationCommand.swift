@@ -67,7 +67,7 @@ struct ConfigurationGetCommand: ParsableCommand {
 }
 
 extension ConfigurationGetCommand {
-  enum CodingKeys: String, CodingKey {
+  enum CodingKeys: CodingKey {
     case key
   }
 }
@@ -152,7 +152,7 @@ struct ConfigurationSetCommand: ParsableCommand {
 }
 
 extension ConfigurationSetCommand {
-  enum CodingKeys: String, CodingKey {
+  enum CodingKeys: CodingKey {
     case key
     case value
   }

@@ -98,7 +98,7 @@ struct AuthenticationLoginCommand: AsyncParsableCommand {
 }
 
 extension AuthenticationLoginCommand {
-  enum CodingKeys: String, CodingKey {
+  enum CodingKeys: CodingKey {
     case username
     case password
   }

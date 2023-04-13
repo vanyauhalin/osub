@@ -33,7 +33,7 @@ let project = Project(
         "CFBundleVersion": "\(Environment.buildVersion.getString(default: ""))",
         "NSHumanReadableCopyright": "Copyright © 2023 vanyauhalin. All rights reserved."
       ]),
-      sources: "osub/OpenSubtitlesCLI.swift",
+      sources: "osub/OpenSubtitles.swift",
       dependencies: [
         .package(product: "ArgumentParser"),
         .package(product: "TOMLKit"),
