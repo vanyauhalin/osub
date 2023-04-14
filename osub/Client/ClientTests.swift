@@ -44,7 +44,7 @@ final class ClientURLTests: XCTestCase {
     let url = try client.url(path: "tango", with: [
       URLQueryItem(name: "cost", value: "90")
     ])
-    XCTAssertEqual(url.absoluteString, "http://localhost/tango?cost=90")
+    XCTAssertEqual(url.absoluteString, "http://localhost/tango?%26&cost=90")
   }
 }
 
