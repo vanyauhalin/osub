@@ -7,17 +7,51 @@ import State
 import TestCase
 import XCTest
 
+final class AuthenticationListCommandTests: XCTestCase {
+  func testRuns() throws {
+    let output = MockedTextOutputStream()
+    var command = try AuthenticationListCommand.parse([])
+    command.output = output
+    command.stateManager = MockedStateManager(
+      load: {
+        State(
+          baseURL: URL(string: "http://localhost/"),
+          token: "www"
+        )
+      }
+    )
+    try command.run()
+    XCTAssertEqual(
+      output.string,
+      """
+      base_url=http://localhost/
+      token=www\n
+      """
+    )
+  }
+}
+
 final class AuthenticationLoginCommandTests: XCTestCase {
-  func testLogins() async throws {
+  func testRuns() async throws {
+    let output = MockedTextOutputStream()
+    var config: Configuration?
+    var state: State?
     var command = try AuthenticationLoginCommand.parse(["lynsey", "lawrence"])
+    command.output = output
     command.configManager = MockedConfigurationManager(
       load: {
         Configuration()
+      },
+      write: { writing in
+        config = writing
       }
     )
     command.stateManager = MockedStateManager(
       load: {
         State()
+      },
+      write: { writing in
+        state = writing
       }
     )
     command.client = MockedClient(
@@ -31,16 +65,25 @@ final class AuthenticationLoginCommandTests: XCTestCase {
       )
     )
     try await command.run()
-    XCTAssertEqual(command.config?.username, "lynsey")
-    XCTAssertEqual(command.config?.password, "lawrence")
-    XCTAssertEqual(command.state?.baseURL?.absoluteString, "http://localhost/")
-    XCTAssertEqual(command.state?.token, "www")
+    XCTAssertEqual(config?.username, "lynsey")
+    XCTAssertEqual(config?.password, "lawrence")
+    XCTAssertEqual(state?.baseURL?.absoluteString, "http://localhost/")
+    XCTAssertEqual(state?.token, "www")
+    XCTAssertEqual(
+      output.string,
+      """
+      The authentication token has been successfully generated.\n
+      """
+    )
   }
 }
 
 final class AuthenticationCommandLogoutTests: XCTestCase {
-  func testLogouts() async throws {
+  func testRuns() async throws {
+    let output = MockedTextOutputStream()
+    var state: State?
     var command = try AuthenticationLogoutCommand.parse([])
+    command.output = output
     command.configManager = MockedConfigurationManager(
       load: {
         Configuration()
@@ -52,6 +95,9 @@ final class AuthenticationCommandLogoutTests: XCTestCase {
           baseURL: URL(string: "http://localhost/"),
           token: "www"
         )
+      },
+      write: { writing in
+        state = writing
       }
     )
     command.client = MockedClient(
@@ -64,9 +110,16 @@ final class AuthenticationCommandLogoutTests: XCTestCase {
       )
     )
     try await command.run()
-    XCTAssertNotNil(command.state)
-    XCTAssertNil(command.state?.baseURL)
-    XCTAssertNil(command.state?.token)
+    XCTAssertNotNil(state)
+    XCTAssertNil(state?.baseURL)
+    XCTAssertNil(state?.token)
+    XCTAssertEqual(
+      output.string,
+      """
+      The authentication token has been successfully destroyed.
+      jackpot\n
+      """
+    )
   }
 }
 
@@ -91,7 +144,10 @@ final class AuthenticationRefreshCommandTests: XCTestCase {
   }
 
   func testRefreshesWhenTheConfigurationIsNotEmpty() async throws {
+    let output = MockedTextOutputStream()
+    var state: State?
     var command = try AuthenticationRefreshCommand.parse([])
+    command.output = output
     command.configManager = MockedConfigurationManager(
       load: {
         Configuration(
@@ -103,6 +159,9 @@ final class AuthenticationRefreshCommandTests: XCTestCase {
     command.stateManager = MockedStateManager(
       load: {
         State()
+      },
+      write: { writing in
+        state = writing
       }
     )
     command.client = MockedClient(
@@ -116,14 +175,22 @@ final class AuthenticationRefreshCommandTests: XCTestCase {
       )
     )
     try await command.run()
-    XCTAssertEqual(command.state?.baseURL?.absoluteString, "http://localhost/")
-    XCTAssertEqual(command.state?.token, "www")
+    XCTAssertEqual(state?.baseURL?.absoluteString, "http://localhost/")
+    XCTAssertEqual(state?.token, "www")
+    XCTAssertEqual(
+      output.string,
+      """
+      The authentication token has been successfully refreshed.\n
+      """
+    )
   }
 }
 
 final class AuthenticationCommandStatusTests: XCTestCase {
-  func testStatus() async throws {
-    var command = try AuthenticationStatusCommand.parse([])
+  func testRuns() async throws {
+    let output = MockedTextOutputStream()
+    var command = try AuthenticationStatusCommand.parse(["--no-frame"])
+    command.output = output
     command.configManager = MockedConfigurationManager(
       load: {
         Configuration()
@@ -147,7 +214,12 @@ final class AuthenticationCommandStatusTests: XCTestCase {
       )
     )
     try await command.run()
-    XCTAssertEqual(command.user?.data.userID, 9000)
-    XCTAssertEqual(command.user?.data.remainingDownloads, 20)
+    XCTAssertEqual(
+      output.string,
+      """
+      USER ID  REMAINING DOWNLOADS
+      9000     20                 \n
+      """
+    )
   }
 }

@@ -8,18 +8,13 @@ struct VersionCommand: ParsableCommand {
   )
 
   var bundle: Bundle = .main
+  var output = StandardTextOutputStream.shared
 
-  var version: String {
-    (bundle.infoDictionary?["CFBundleVersion"] as? String) ?? "unknown"
-  }
-
-  var release: String {
-    "https://github.com/vanyauhalin/osub/releases/tag/v\(version)"
-  }
-
-  func run() {
-    print(version)
-    print(release)
+  mutating func run() {
+    let version = (bundle.infoDictionary?["CFBundleVersion"] as? String) ?? ""
+    let release = "https://github.com/vanyauhalin/osub/releases/tag/v\(version)"
+    print(version, to: &output)
+    print(release, to: &output)
   }
 }
 

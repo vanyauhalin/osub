@@ -23,6 +23,18 @@ public struct Command: AsyncParsableCommand {
   public init() {}
 }
 
+// MARK: Output
+
+open class StandardTextOutputStream: TextOutputStream {
+  public static let shared = StandardTextOutputStream()
+
+  public init() {}
+
+  open func write(_ string: String) {
+    print(string, terminator: "")
+  }
+}
+
 // MARK: Formatting
 
 protocol FormattingField:
@@ -51,9 +63,10 @@ where Field: FormattingField {
   )
   var frame = true
 
-  func printer() -> TablePrinter {
+  func printer<Output>(output: Output) -> TablePrinter<Output>
+  where Output: TextOutputStream {
     let window = frame ? Window.shared : Window(columns: .max)
-    var printer = TablePrinter(window: window)
+    var printer = TablePrinter(window: window, output: output)
     fields.forEach { field in
       let header = field.text.uppercased()
       printer.append(header)

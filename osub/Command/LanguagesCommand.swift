@@ -12,6 +12,7 @@ struct LanguagesCommand: AsyncParsableCommand {
   @OptionGroup(title: "Formatting Options")
   var formatting: FormattingOptions<Field>
 
+  var output = StandardTextOutputStream.shared
   var configManager: ConfigurationManagerProtocol = ConfigurationManager.shared
   var stateManager: StateManagerProtocol = StateManager.shared
   var client: ClientProtocol = Client.shared
@@ -30,8 +31,8 @@ struct LanguagesCommand: AsyncParsableCommand {
   mutating func action() async throws {
     let languages = try await client.info.languages()
 
-    var printer = formatting.printer()
-    languages.data.forEach { language in
+    var printer = formatting.printer(output: output)
+    languages.data.enumerated().forEach { index, language in
       formatting.fields.forEach { field in
         switch field {
         case .name:
@@ -40,7 +41,9 @@ struct LanguagesCommand: AsyncParsableCommand {
           printer.append(language.languageCode)
         }
       }
-      printer.next()
+      if index < languages.data.count - 1 {
+        printer.next()
+      }
     }
     printer.print()
   }
