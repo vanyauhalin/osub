@@ -1,7 +1,6 @@
 public struct TablePrinter {
-  private static let delimiter = "  "
-  private static let ellipsis = "..."
-  private static let null = "?"
+  private let delimiter = "  "
+  private let ellipsis = "..."
 
   private let window: WindowProtocol
 
@@ -11,28 +10,8 @@ public struct TablePrinter {
     self.window = window
   }
 
-  mutating func append(_ field: String) {
+  public mutating func append(_ field: String) {
     rows[rows.count - 1].append(field)
-  }
-
-  public mutating func append(_ field: String? = nil) {
-    guard let field else {
-      append(TablePrinter.null)
-      return
-    }
-    append(field)
-  }
-
-  public mutating func append<T>(_ field: T? = nil) where T: LosslessStringConvertible {
-    guard let field else {
-      append(TablePrinter.null)
-      return
-    }
-    append(String(field))
-  }
-
-  public mutating func append<T>(_ field: T? = nil) where T: RawRepresentable<String> {
-    append(field?.rawValue)
   }
 
   public mutating func next() {
@@ -45,7 +24,7 @@ public struct TablePrinter {
       row.enumerated().forEach { column, field in
         let columnWidth = columnsWidths[column]
         let text = field.count > columnWidth
-          ? field.prefix(columnWidth - TablePrinter.ellipsis.count) + TablePrinter.ellipsis
+          ? field.prefix(columnWidth - ellipsis.count) + ellipsis
           : field
         let spaceCount = columnWidth - text.count
         let space = spaceCount >= 0
@@ -55,7 +34,7 @@ public struct TablePrinter {
           Swift.print("\(text)\(space)", terminator: "")
           return
         }
-        Swift.print("\(text)\(space)\(TablePrinter.delimiter)", terminator: "")
+        Swift.print("\(text)\(space)\(delimiter)", terminator: "")
       }
       if index != rows.count - 1 {
         Swift.print()
@@ -80,7 +59,7 @@ public struct TablePrinter {
 
     func availableWidth() -> Int {
       window.columns
-        - TablePrinter.delimiter.count * (countColumns - 1)
+        - delimiter.count * (countColumns - 1)
         - columnsWidths.reduce(Int.zero) { result, width  in
           result + width
         }
