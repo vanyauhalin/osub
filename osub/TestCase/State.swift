@@ -23,7 +23,7 @@ public final class MockedStateManager: StateManagerProtocol {
     guard let mockedWrite else {
       fatalError("The \(#function) is not implemented.")
     }
-    return mockedWrite(state)
+    mockedWrite(state)
   }
 
   public func merge(current: State, with new: State) -> State {

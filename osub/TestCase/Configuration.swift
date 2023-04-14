@@ -54,7 +54,7 @@ public final class MockedConfigurationManager: ConfigurationManagerProtocol {
     guard let mockedWrite else {
       fatalError("The \(#function) is not implemented.")
     }
-    return mockedWrite(config)
+    mockedWrite(config)
   }
 
   public func merge(current: Configuration, with new: Configuration) -> Configuration {
