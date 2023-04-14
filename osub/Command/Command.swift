@@ -2,6 +2,7 @@ import ArgumentParser
 import Client
 import Configuration
 import State
+import TablePrinter
 
 public struct Command: AsyncParsableCommand {
   public static let configuration = CommandConfiguration(
@@ -19,6 +20,53 @@ public struct Command: AsyncParsableCommand {
   )
 
   public init() {}
+}
+
+// MARK: Formatting
+
+protocol FormattingField:
+  RawRepresentable<String>,
+  CaseIterable,
+  ExpressibleByArgument
+{
+  static var defaultValues: [Self] { get }
+  var text: String { get }
+}
+
+struct FormattingOptions<Field>: ParsableArguments
+where Field: FormattingField {
+  @Option(
+    parsing: .upToNextOption,
+    help: ArgumentHelp(
+      "Space-separated list of fields to print.",
+      valueName: .array(.enum)
+    )
+  )
+  var fields = Field.defaultValues
+
+  @Flag(
+    inversion: .prefixedNo,
+    help: "Consider the window size when formatting."
+  )
+  var frame = true
+
+  func printer() -> TablePrinter {
+    let window = frame ? Window.shared : Window(columns: .max)
+    var printer = TablePrinter(window: window)
+    fields.forEach { field in
+      let header = field.text.uppercased()
+      printer.append(header)
+    }
+    printer.next()
+    return printer
+  }
+}
+
+extension FormattingOptions {
+  enum CodingKeys: CodingKey {
+    case fields
+    case frame
+  }
 }
 
 // MARK: Extensions
