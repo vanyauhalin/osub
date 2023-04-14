@@ -9,10 +9,14 @@ public final class Window: WindowProtocol {
 
   public let columns: Int
 
+  public init(columns: Int) {
+    self.columns = columns
+  }
+
   public init() {
     var size = winsize()
-    guard ioctl(STDOUT_FILENO, TIOCGWINSZ, &size) == 0 else {
-      self.columns = 0
+    guard ioctl(STDOUT_FILENO, TIOCGWINSZ, &size) == .zero else {
+      self.columns = .zero
       return
     }
     self.columns = Int(size.ws_col)

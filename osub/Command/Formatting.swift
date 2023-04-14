@@ -16,8 +16,15 @@ struct FormattingOptions<Field>: ParsableArguments where Field: FormattingField 
   )
   var fields = Field.defaultValues
 
+  @Flag(
+    inversion: .prefixedNo,
+    help: "Consider the window size when formatting."
+  )
+  var frame = true
+
   func printer() -> TablePrinter {
-    var printer = TablePrinter()
+    let window = frame ? Window.shared : Window(columns: .max)
+    var printer = TablePrinter(window: window)
     fields.forEach { field in
       let header = field.text.uppercased()
       printer.append(header)
@@ -30,5 +37,6 @@ struct FormattingOptions<Field>: ParsableArguments where Field: FormattingField 
 extension FormattingOptions {
   enum CodingKeys: CodingKey {
     case fields
+    case frame
   }
 }
