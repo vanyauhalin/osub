@@ -24,19 +24,15 @@ struct ConfigurationGetCommand: ParsableCommand {
   )
 
   @Argument(help: "The configuration key.")
-  var key: String
+  var key: Configuration.CodingKeys
 
   var output = StandardTextOutputStream.shared
   var configManager: ConfigurationManagerProtocol = ConfigurationManager.shared
 
   mutating func run() throws {
-    guard let key = Configuration.CodingKeys(rawValue: key) else {
-      throw ConfigurationCommandError.cannotGet
-    }
-
     let config = try configManager.load()
-    let mirror = Mirror(reflecting: config)
 
+    let mirror = Mirror(reflecting: config)
     let keyLabel = {
       switch key {
       case .apiKey:
@@ -115,7 +111,7 @@ struct ConfigurationSetCommand: ParsableCommand {
   )
 
   @Argument(help: "The configuration key.")
-  var key: String
+  var key: Configuration.CodingKeys
 
   @Argument(help: "The value of the configuration key.")
   var value: String
@@ -124,11 +120,8 @@ struct ConfigurationSetCommand: ParsableCommand {
   var configManager: ConfigurationManagerProtocol = ConfigurationManager.shared
 
   mutating func run() throws {
-    guard let key = Configuration.CodingKeys(rawValue: key) else {
-      throw ConfigurationCommandError.cannotSet
-    }
-
     let config = try configManager.load()
+
     try configManager.write(
       config: configManager.merge(
         current: config,
@@ -160,27 +153,13 @@ extension ConfigurationSetCommand {
 
 enum ConfigurationCommandError: Error {
   case cannotGet
-  case cannotSet
-}
-
-extension ConfigurationCommandError {
-  var supportedKeys: String {
-    let keys = Configuration.CodingKeys.allCases
-      .map { item in
-        item.stringValue
-      }
-      .joined(separator: ", ")
-    return "List of supported keys: \(keys)."
-  }
 }
 
 extension ConfigurationCommandError: CustomStringConvertible {
   var description: String {
     switch self {
     case .cannotGet:
-      return "The configuration key hasn't been get. Ensure the key is supported.\n\(supportedKeys)"
-    case .cannotSet:
-      return "The configuration key hasn't been set. Ensure the key is supported.\n\(supportedKeys)"
+      return "The configuration key hasn't been get."
     }
   }
 }
@@ -189,8 +168,12 @@ extension ConfigurationCommandError: CustomStringConvertible {
 
 extension Configuration: Listable {}
 
-extension Configuration.CodingKeys: CaseIterable {
+extension Configuration.CodingKeys: CaseIterable, ExpressibleByArgument {
   public static var allCases: [Configuration.CodingKeys] {
-    [.apiKey, .username, .password]
+    [
+      .apiKey,
+      .username,
+      .password
+    ]
   }
 }

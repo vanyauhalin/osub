@@ -25,11 +25,6 @@ final class ConfigurationGetCommandTests: XCTestCase {
       """
     )
   }
-
-  func testThrownAnErrorIfTheKeyIsNotSupported() throws {
-    var command = try ConfigurationGetCommand.parse(["unknown"])
-    XCTAssertThrowsError(try command.run())
-  }
 }
 
 final class ConfigurationListCommandTests: XCTestCase {
@@ -107,10 +102,5 @@ final class ConfigurationSetCommandTests: XCTestCase {
       The configuration key has been successfully updated.\n
       """
     )
-  }
-
-  func testThrownAnErrorIfTheKeyIsNotSupported() throws {
-    var command = try ConfigurationSetCommand.parse(["unknown", "opa"])
-    XCTAssertThrowsError(try command.run())
   }
 }
