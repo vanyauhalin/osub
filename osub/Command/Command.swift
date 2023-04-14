@@ -72,16 +72,6 @@ extension FormattingOptions {
 
 // MARK: Extensions
 
-extension ClientProtocol {
-  func configure(config: Configuration, state: State) {
-    self.configure(
-      apiKey: config.apiKey,
-      baseURL: state.baseURL,
-      token: state.token
-    )
-  }
-}
-
 indirect enum ValueName {
   case array(ValueName)
   case `enum`
@@ -116,5 +106,37 @@ extension ArgumentHelp {
       discussion: discussion,
       valueName: valueName?.rawValue
     )
+  }
+}
+
+extension ClientProtocol {
+  func configure(config: Configuration, state: State) {
+    self.configure(
+      apiKey: config.apiKey,
+      baseURL: state.baseURL,
+      token: state.token
+    )
+  }
+}
+
+extension TablePrinter {
+  mutating func append(_ field: String? = nil) {
+    guard let field else {
+      append("?")
+      return
+    }
+    append(field)
+  }
+
+  mutating func append<T>(_ field: T? = nil) where T: LosslessStringConvertible {
+    guard let field else {
+      append()
+      return
+    }
+    append(String(field))
+  }
+
+  mutating func append<T>(_ field: T? = nil) where T: RawRepresentable<String> {
+    append(field?.rawValue)
   }
 }
