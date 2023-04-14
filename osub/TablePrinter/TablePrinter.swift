@@ -20,7 +20,7 @@ public struct TablePrinter {
 
   public func print() {
     let columnsWidths = columnsWidths()
-    rows.enumerated().forEach { index, row in
+    rows.forEach { row in
       row.enumerated().forEach { column, field in
         let columnWidth = columnsWidths[column]
         let text = field.count > columnWidth
@@ -36,9 +36,7 @@ public struct TablePrinter {
         }
         Swift.print("\(text)\(space)\(delimiter)", terminator: "")
       }
-      if index != rows.count - 1 {
-        Swift.print()
-      }
+      Swift.print()
     }
   }
 
