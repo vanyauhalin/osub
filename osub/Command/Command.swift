@@ -7,6 +7,7 @@ import TablePrinter
 public struct Command: AsyncParsableCommand {
   public static let configuration = CommandConfiguration(
     commandName: "osub",
+    abstract: "OpenSubtitles in your terminal.",
     subcommands: [
       AuthenticationCommand.self,
       ConfigurationCommand.self,
