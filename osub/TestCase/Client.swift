@@ -71,12 +71,12 @@ public final class MockedClient: ClientProtocol {
 }
 
 public final class MockedAuthenticationService: AuthenticationServiceProtocol {
-  let mockedLogin: (() throws -> LoginEntity)?
-  let mockedLogout: (() throws -> InformationEntity)?
+  let mockedLogin: (() -> LoginEntity)?
+  let mockedLogout: (() -> InformationEntity)?
 
   public init(
-    login: (() throws -> LoginEntity)? = nil,
-    logout: (() throws -> InformationEntity)? = nil
+    login: (() -> LoginEntity)? = nil,
+    logout: (() -> InformationEntity)? = nil
   ) {
     self.mockedLogin = login
     self.mockedLogout = logout
@@ -86,24 +86,39 @@ public final class MockedAuthenticationService: AuthenticationServiceProtocol {
     guard let mockedLogin else {
       fatalError("The \(#function) is not implemented.")
     }
-    return try mockedLogin()
+    return mockedLogin()
   }
 
   public func logout() async throws -> InformationEntity {
     guard let mockedLogout else {
       fatalError("The \(#function) is not implemented.")
     }
-    return try mockedLogout()
+    return mockedLogout()
+  }
+}
+
+public final class MockedDownloadsService: DownloadsServiceProtocol {
+  public let mockedPost: (() -> DownloadEntity)?
+
+  public init(post: (() -> DownloadEntity)? = nil) {
+    self.mockedPost = post
+  }
+
+  public func post(fileID: Int) async throws -> DownloadEntity {
+    guard let mockedPost else {
+      fatalError("The \(#function) is not implemented.")
+    }
+    return mockedPost()
   }
 }
 
 public final class MockedInformationService: InformationServiceProtocol {
-  public let mockedLanguages: (() throws -> DatumedEntity<[LanguageEntity]>)?
-  public let mockedUser: (() throws -> DatumedEntity<UserEntity>)?
+  public let mockedLanguages: (() -> DatumedEntity<[LanguageEntity]>)?
+  public let mockedUser: (() -> DatumedEntity<UserEntity>)?
 
   public init(
-    languages: (() throws -> DatumedEntity<[LanguageEntity]>)? = nil,
-    user: (() throws -> DatumedEntity<UserEntity>)? = nil
+    languages: (() -> DatumedEntity<[LanguageEntity]>)? = nil,
+    user: (() -> DatumedEntity<UserEntity>)? = nil
   ) {
     self.mockedLanguages = languages
     self.mockedUser = user
@@ -113,13 +128,55 @@ public final class MockedInformationService: InformationServiceProtocol {
     guard let mockedLanguages else {
       fatalError("The \(#function) is not implemented.")
     }
-    return try mockedLanguages()
+    return mockedLanguages()
   }
 
   public func user() async throws -> DatumedEntity<UserEntity> {
     guard let mockedUser else {
       fatalError("The \(#function) is not implemented.")
     }
-    return try mockedUser()
+    return mockedUser()
+  }
+}
+
+public final class MockedSearchService: SearchServiceProtocol {
+  public let mockedSubtitles: (() -> PaginatedEntity<AttributedEntity<SubtitlesEntity>>)?
+
+  public init(
+    subtitles: (() -> PaginatedEntity<AttributedEntity<SubtitlesEntity>>)? = nil
+  ) {
+    self.mockedSubtitles = subtitles
+  }
+
+  // swiftlint:disable:next function_parameter_count
+  public func subtitles(
+    aiTranslated: SearchSubtitlesAITranslated?,
+    episodeNumber: Int?,
+    foreignPartsOnly: SearchSubtitlesForeignPartsOnly?,
+    hearingImpaired: SearchSubtitlesHearingImpaired?,
+    id: Int?,
+    imdbID: Int?,
+    languages: String?,
+    machineTranslated: SearchSubtitlesMachineTranslated?,
+    moviehashMatch: SearchSubtitlesMoviehashMatch?,
+    moviehash: String?,
+    orderBy: SearchSubtitlesOrderBy?,
+    orderDirection: SearchSubtitlesOrderDirection?,
+    page: Int?,
+    parentFeatureID: Int?,
+    parentIMDBID: Int?,
+    parentTMDBID: Int?,
+    query: String?,
+    seasonNumber: Int?,
+    tmdbID: Int?,
+    trustedSources: SearchSubtitlesTrustedSources?,
+    type: SearchSubtitlesFeatureType?,
+    userID: Int?,
+    year: Int?
+  ) async throws -> PaginatedEntity<AttributedEntity<SubtitlesEntity>> {
+    guard let mockedSubtitles else {
+      fatalError("The \(#function) is not implemented.")
+    }
+    return mockedSubtitles()
   }
 }

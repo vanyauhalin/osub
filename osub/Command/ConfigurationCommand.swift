@@ -26,9 +26,8 @@ struct ConfigurationGetCommand: ParsableCommand {
   @Argument(help: "The configuration key.")
   var key: String
 
+  var output = StandardTextOutputStream.shared
   var configManager: ConfigurationManagerProtocol = ConfigurationManager.shared
-
-  var value: Any?
 
   mutating func run() throws {
     guard let key = Configuration.CodingKeys(rawValue: key) else {
@@ -56,12 +55,10 @@ struct ConfigurationGetCommand: ParsableCommand {
       throw ConfigurationCommandError.cannotGet
     }
 
-    self.value = child.value
-
     if case Optional<Any>.none = child.value {
-      print()
-    } else {
-      print(child.value)
+      print("", to: &output)
+    } else if let string = child.value as? String {
+      print(string, to: &output)
     }
   }
 }
@@ -78,11 +75,12 @@ struct ConfigurationListCommand: ParsableCommand {
     abstract: "Print a list of configuration keys and values."
   )
 
+  var output = StandardTextOutputStream.shared
   var configManager: ConfigurationManagerProtocol = ConfigurationManager.shared
 
   mutating func run() throws {
     let config = try configManager.load()
-    print(config.description.isEmpty ? "" : config)
+    print(config.description.isEmpty ? "" : config, to: &output)
   }
 }
 
@@ -96,12 +94,13 @@ struct ConfigurationLocationsCommand: ParsableCommand {
     abstract: "Print a locations used by osub."
   )
 
+  var output = StandardTextOutputStream.shared
   var configManager: ConfigurationManagerProtocol = ConfigurationManager.shared
 
-  func run() throws {
-    print(configManager.configDirectory.path2())
-    print(configManager.stateDirectory.path2())
-    print(configManager.downloadsDirectory.path2())
+  mutating func run() {
+    print(configManager.configDirectory.path2(), to: &output)
+    print(configManager.stateDirectory.path2(), to: &output)
+    print(configManager.downloadsDirectory.path2(), to: &output)
   }
 }
 
@@ -121,9 +120,8 @@ struct ConfigurationSetCommand: ParsableCommand {
   @Argument(help: "The value of the configuration key.")
   var value: String
 
+  var output = StandardTextOutputStream.shared
   var configManager: ConfigurationManagerProtocol = ConfigurationManager.shared
-
-  var config: Configuration?
 
   mutating func run() throws {
     guard let key = Configuration.CodingKeys(rawValue: key) else {
@@ -131,23 +129,23 @@ struct ConfigurationSetCommand: ParsableCommand {
     }
 
     let config = try configManager.load()
-    let newConfig = configManager.merge(
-      current: config,
-      with: {
-        switch key {
-        case .apiKey:
-          return Configuration(apiKey: value)
-        case .username:
-          return Configuration(username: value)
-        case .password:
-          return Configuration(password: value)
-        }
-      }()
+    try configManager.write(
+      config: configManager.merge(
+        current: config,
+        with: {
+          switch key {
+          case .apiKey:
+            return Configuration(apiKey: value)
+          case .username:
+            return Configuration(username: value)
+          case .password:
+            return Configuration(password: value)
+          }
+        }()
+      )
     )
-    try configManager.write(config: newConfig)
-    self.config = newConfig
 
-    print("The configuration key has been successfully updated.")
+    print("The configuration key has been successfully updated.", to: &output)
   }
 }
 

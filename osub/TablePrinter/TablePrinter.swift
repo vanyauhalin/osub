@@ -1,13 +1,18 @@
-public struct TablePrinter {
+public struct TablePrinter<Output> where Output: TextOutputStream {
   private let delimiter = "  "
   private let ellipsis = "..."
 
   private let window: WindowProtocol
+  private var output: Output
 
   var rows: [[String]] = [[]]
 
-  public init(window: WindowProtocol = Window.shared) {
+  public init(
+    window: WindowProtocol = Window.shared,
+    output: Output
+  ) {
     self.window = window
+    self.output = output
   }
 
   public mutating func append(_ field: String) {
@@ -18,7 +23,7 @@ public struct TablePrinter {
     rows.append([])
   }
 
-  public func print() {
+  public mutating func print() {
     let columnsWidths = columnsWidths()
     rows.forEach { row in
       row.enumerated().forEach { column, field in
@@ -31,12 +36,12 @@ public struct TablePrinter {
           ? String(repeating: " ", count: spaceCount)
           : ""
         if column == row.count - 1 {
-          Swift.print("\(text)\(space)", terminator: "")
+          Swift.print("\(text)\(space)", terminator: "", to: &output)
           return
         }
-        Swift.print("\(text)\(space)\(delimiter)", terminator: "")
+        Swift.print("\(text)\(space)\(delimiter)", terminator: "", to: &output)
       }
-      Swift.print()
+      Swift.print("", to: &output)
     }
   }
 

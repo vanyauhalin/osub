@@ -10,8 +10,16 @@ struct HashCommand: ParsableCommand {
   @Argument(help: "The path to the file whose hash is to be calculated.")
   var path: String
 
-  func run() throws {
+  var output = StandardTextOutputStream.shared
+
+  mutating func run() throws {
     let hash = try Hash.hash(of: path)
-    print(hash)
+    print(hash, to: &output)
+  }
+}
+
+extension HashCommand {
+  enum CodingKeys: CodingKey {
+    case path
   }
 }

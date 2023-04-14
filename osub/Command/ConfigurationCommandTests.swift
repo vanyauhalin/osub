@@ -6,8 +6,10 @@ import TestCase
 import XCTest
 
 final class ConfigurationGetCommandTests: XCTestCase {
-  func testGets() throws {
+  func testRuns() throws {
+    let output = MockedTextOutputStream()
     var command = try ConfigurationGetCommand.parse(["api_key"])
+    command.output = output
     command.configManager = MockedConfigurationManager(
       load: {
         Configuration(
@@ -16,7 +18,12 @@ final class ConfigurationGetCommandTests: XCTestCase {
       }
     )
     try command.run()
-    XCTAssertEqual(command.value as? String, "xxx")
+    XCTAssertEqual(
+      output.string,
+      """
+      xxx\n
+      """
+    )
   }
 
   func testThrownAnErrorIfTheKeyIsNotSupported() throws {
@@ -25,18 +32,81 @@ final class ConfigurationGetCommandTests: XCTestCase {
   }
 }
 
+final class ConfigurationListCommandTests: XCTestCase {
+  func testRuns() throws {
+    let output = MockedTextOutputStream()
+    var command = try ConfigurationListCommand.parse([])
+    command.output = output
+    command.configManager = MockedConfigurationManager(
+      load: {
+        Configuration(
+          apiKey: "xxx",
+          username: "lynsey",
+          password: "lawrence"
+        )
+      }
+    )
+    try command.run()
+    XCTAssertEqual(
+      output.string,
+      """
+      api_key=xxx
+      username=lynsey
+      password=lawrence\n
+      """
+    )
+  }
+}
+
+final class ConfigurationLocationsCommandTests: XCTestCase {
+  func testRuns() throws {
+    let output = MockedTextOutputStream()
+    let configDirectory = try FileManager.default.temporaryDirectory()
+    let stateDirectory = try FileManager.default.temporaryDirectory()
+    let downloadsDirectory = try FileManager.default.temporaryDirectory()
+    var command = try ConfigurationLocationsCommand.parse([])
+    command.output = output
+    command.configManager = MockedConfigurationManager(
+      configDirectory: configDirectory,
+      stateDirectory: stateDirectory,
+      downloadsDirectory: downloadsDirectory
+    )
+    command.run()
+    XCTAssertEqual(
+      output.string,
+      """
+      \(configDirectory.path2())
+      \(stateDirectory.path2())
+      \(downloadsDirectory.path2())\n
+      """
+    )
+  }
+}
+
 final class ConfigurationSetCommandTests: XCTestCase {
-  func testSets() throws {
+  func testRuns() throws {
+    let output = MockedTextOutputStream()
+    var config: Configuration?
     var command = try ConfigurationSetCommand.parse(["api_key", "yyy"])
+    command.output = output
     command.configManager = MockedConfigurationManager(
       load: {
         Configuration(
           apiKey: "xxx"
         )
+      },
+      write: { writing in
+        config = writing
       }
     )
     try command.run()
-    XCTAssertEqual(command.config?.apiKey, "yyy")
+    XCTAssertEqual(config?.apiKey, "yyy")
+    XCTAssertEqual(
+      output.string,
+      """
+      The configuration key has been successfully updated.\n
+      """
+    )
   }
 
   func testThrownAnErrorIfTheKeyIsNotSupported() throws {

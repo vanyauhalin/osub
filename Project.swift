@@ -163,7 +163,9 @@ let project = Project(
       dependencies: [
         .package(product: "TOMLKit"),
         .target(name: "Client"),
+        .target(name: "Command"),
         .target(name: "Configuration"),
+        .target(name: "Downloads"),
         .target(name: "Extensions"),
         .target(name: "Network"),
         .target(name: "State"),

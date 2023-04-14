@@ -20,6 +20,7 @@ struct DownloadCommand: AsyncParsableCommand {
   )
   var fileID: Int
 
+  var output = StandardTextOutputStream.shared
   var configManager: ConfigurationManagerProtocol = ConfigurationManager.shared
   var stateManager: StateManagerProtocol = StateManager.shared
   var downloadsManager: DownloadsManagerProtocol = DownloadsManager.shared
@@ -44,7 +45,11 @@ struct DownloadCommand: AsyncParsableCommand {
 
     let dist = try await downloadsManager.download(from: url)
 
-    print("The subtitles have been successfully downloaded to", dist.path2())
+    print(
+      "The subtitles have been successfully downloaded to",
+      dist.path2(),
+      to: &output
+    )
   }
 }
 

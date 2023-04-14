@@ -30,6 +30,7 @@ struct SearchSubtitlesCommand: AsyncParsableCommand {
   @OptionGroup(title: "Formatting Options")
   var formatting: FormattingOptions<Field>
 
+  var output = StandardTextOutputStream.shared
   var configManager: ConfigurationManagerProtocol = ConfigurationManager.shared
   var stateManager: StateManagerProtocol = StateManager.shared
   var client: ClientProtocol = Client.shared
@@ -94,7 +95,7 @@ struct SearchSubtitlesCommand: AsyncParsableCommand {
       year: query.year
     )
 
-    var printer = formatting.printer()
+    var printer = formatting.printer(output: output)
 
     // swiftlint:disable:next cyclomatic_complexity
     func resolve(entity: AttributedEntity<SubtitlesEntity>, file: File? = nil) {
@@ -168,14 +169,15 @@ struct SearchSubtitlesCommand: AsyncParsableCommand {
       }
     }
 
-    subtitles.data.forEach { entity in
+    subtitles.data.enumerated().forEach { index, entity in
       if entity.attributes.files.isEmpty {
         resolve(entity: entity)
-        printer.next()
-        return
+      } else {
+        entity.attributes.files.forEach { file in
+          resolve(entity: entity, file: file)
+        }
       }
-      entity.attributes.files.forEach { file in
-        resolve(entity: entity, file: file)
+      if index < subtitles.data.count - 1 {
         printer.next()
       }
     }
@@ -186,9 +188,10 @@ struct SearchSubtitlesCommand: AsyncParsableCommand {
     let page = query.page ?? 1
     let pages = Int((Double(total) / Double(perPage)).rounded(.awayFromZero))
 
-    print()
-    print("Printing \(page) page of \(pages) for \(total) subtitles.")
-    print()
+    print(
+      "\nPrinting \(page) page of \(pages) for \(total) subtitles.\n",
+      to: &output
+    )
     printer.print()
   }
 }

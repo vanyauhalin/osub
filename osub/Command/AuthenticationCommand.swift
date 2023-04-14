@@ -24,11 +24,12 @@ struct AuthenticationListCommand: AsyncParsableCommand {
     abstract: "Print a list of authentication keys and values."
   )
 
+  var output = StandardTextOutputStream.shared
   var stateManager: StateManagerProtocol = StateManager.shared
 
   mutating func run() throws {
     let state = try stateManager.load()
-    print(state.description.isEmpty ? "" : state)
+    print(state.description.isEmpty ? "" : state, to: &output)
   }
 }
 
@@ -48,12 +49,10 @@ struct AuthenticationLoginCommand: AsyncParsableCommand {
   @Argument(help: "The account password.")
   var password: String
 
+  var output = StandardTextOutputStream.shared
   var configManager: ConfigurationManagerProtocol = ConfigurationManager.shared
   var stateManager: StateManagerProtocol = StateManager.shared
   var client: ClientProtocol = Client.shared
-
-  var config: Configuration?
-  var state: State?
 
   mutating func run() async throws {
     let (config, state) = try configure()
@@ -72,28 +71,28 @@ struct AuthenticationLoginCommand: AsyncParsableCommand {
       username: username,
       password: password
     )
-
-    let newConfig = configManager.merge(
-      current: config,
-      with: Configuration(
-        username: username,
-        password: password
+    try configManager.write(
+      config: configManager.merge(
+        current: config,
+        with: Configuration(
+          username: username,
+          password: password
+        )
       )
     )
-    try configManager.write(config: newConfig)
-    self.config = newConfig
-
-    let newState = stateManager.merge(
-      current: state,
-      with: State(
-        baseURL: login.baseURL,
-        token: login.token
+    try stateManager.write(
+      state: stateManager.merge(
+        current: state,
+        with: State(
+          baseURL: login.baseURL,
+          token: login.token
+        )
       )
     )
-    try stateManager.write(state: newState)
-    self.state = newState
-
-    print("The authentication token has been successfully generated.")
+    print(
+      "The authentication token has been successfully generated.",
+      to: &output
+    )
   }
 }
 
@@ -110,11 +109,10 @@ struct AuthenticationLogoutCommand: AsyncParsableCommand {
     abstract: "Logout by destroying the authentication token."
   )
 
+  var output = StandardTextOutputStream.shared
   var configManager: ConfigurationManagerProtocol = ConfigurationManager.shared
   var stateManager: StateManagerProtocol = StateManager.shared
   var client: ClientProtocol = Client.shared
-
-  var state: State?
 
   mutating func run() async throws {
     try configure()
@@ -129,13 +127,15 @@ struct AuthenticationLogoutCommand: AsyncParsableCommand {
 
   mutating func action() async throws {
     let logout = try await client.auth.logout()
+    try stateManager.write(state: State())
 
-    let newState = State()
-    try stateManager.write(state: newState)
-    self.state = newState
-
-    print("The authentication token has been successfully destroyed.")
-    print(logout.message)
+    print(
+      "The authentication token has been successfully destroyed.",
+      to: &output
+    )
+    if let message = logout.message {
+      print(message, to: &output)
+    }
   }
 }
 
@@ -149,11 +149,10 @@ struct AuthenticationRefreshCommand: AsyncParsableCommand {
     abstract: "Refresh the authentication token."
   )
 
+  var output = StandardTextOutputStream.shared
   var configManager: ConfigurationManagerProtocol = ConfigurationManager.shared
   var stateManager: StateManagerProtocol = StateManager.shared
   var client: ClientProtocol = Client.shared
-
-  var state: State?
 
   mutating func run() async throws {
     let (config, state) = try configure()
@@ -179,18 +178,20 @@ struct AuthenticationRefreshCommand: AsyncParsableCommand {
       username: username,
       password: password
     )
-
-    let newState = stateManager.merge(
-      current: state,
-      with: State(
-        baseURL: login.baseURL,
-        token: login.token
+    try stateManager.write(
+      state: stateManager.merge(
+        current: state,
+        with: State(
+          baseURL: login.baseURL,
+          token: login.token
+        )
       )
     )
-    try stateManager.write(state: newState)
-    self.state = newState
 
-    print("The authentication token has been successfully refreshed.")
+    print(
+      "The authentication token has been successfully refreshed.",
+      to: &output
+    )
   }
 }
 
@@ -207,11 +208,10 @@ struct AuthenticationStatusCommand: AsyncParsableCommand {
   @OptionGroup(title: "Formatting Options")
   var formatting: FormattingOptions<Field>
 
+  var output = StandardTextOutputStream.shared
   var configManager: ConfigurationManagerProtocol = ConfigurationManager.shared
   var stateManager: StateManagerProtocol = StateManager.shared
   var client: ClientProtocol = Client.shared
-
-  var user: DatumedEntity<UserEntity>?
 
   mutating func run() async throws {
     try configure()
@@ -226,9 +226,8 @@ struct AuthenticationStatusCommand: AsyncParsableCommand {
 
   mutating func action() async throws {
     let user = try await client.info.user()
-    self.user = user
 
-    var printer = formatting.printer()
+    var printer = formatting.printer(output: output)
     formatting.fields.forEach { field in
       switch field {
       case .remainingDownloads:
@@ -260,9 +259,9 @@ extension AuthenticationStatusCommand {
     var text: String {
       switch self {
       case .remainingDownloads:
-        return "remaining_downloads"
+        return "remaining downloads"
       case .userID:
-        return "user_id"
+        return "user id"
       }
     }
   }
