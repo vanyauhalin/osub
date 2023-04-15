@@ -6,7 +6,8 @@ import State
 struct LanguagesCommand: AsyncParsableCommand {
   static let configuration = CommandConfiguration(
     commandName: "languages",
-    abstract: "Print a list of languages for subtitles."
+    abstract: "Print a list of languages for subtitles.",
+    usage: "osub languages <options>"
   )
 
   @OptionGroup(title: "Formatting Options")

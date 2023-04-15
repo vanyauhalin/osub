@@ -18,7 +18,8 @@ struct SearchCommand: AsyncParsableCommand {
 struct SearchSubtitlesCommand: AsyncParsableCommand {
   static let configuration = CommandConfiguration(
     commandName: "subtitles",
-    abstract: "Search for subtitles."
+    abstract: "Search for subtitles.",
+    usage: "osub search subtitles <options>"
   )
 
   @OptionGroup(title: "Query Options")
