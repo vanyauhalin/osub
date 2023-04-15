@@ -9,7 +9,7 @@ struct DownloadCommand: AsyncParsableCommand {
   static let configuration = CommandConfiguration(
     commandName: "download",
     abstract: "Download subtitles.",
-    discussion: "osub download --file-id <int> <options>"
+    usage: "osub download --file-id <int> <options>"
   )
 
   @OptionGroup(title: "Query Options")

@@ -7,7 +7,7 @@ import State
 struct SearchCommand: AsyncParsableCommand {
   static let configuration = CommandConfiguration(
     commandName: "search",
-    abstract: "Search for subtitles.",
+    abstract: "Search management.",
     subcommands: [
       SearchFeaturesCommand.self,
       SearchSubtitlesCommand.self
