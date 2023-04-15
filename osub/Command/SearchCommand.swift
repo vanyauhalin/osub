@@ -56,19 +56,6 @@ struct SearchSubtitlesCommand: AsyncParsableCommand {
   }
 
   mutating func action() async throws {
-    let languages = query.languages.isEmpty
-      ? nil
-      : query.languages.joined(separator: ",")
-    let moviehash: String? = try {
-      if let moviehash = query.moviehash {
-        return moviehash
-      }
-      if let file = utility.file {
-        return try Hash.hash(of: file)
-      }
-      return nil
-    }()
-
     let subtitles = try await client.search.subtitles(
       aiTranslated: query.aiTranslated,
       episodeNumber: query.episodeNumber,
@@ -76,10 +63,20 @@ struct SearchSubtitlesCommand: AsyncParsableCommand {
       hearingImpaired: query.hearingImpaired,
       id: query.id,
       imdbID: query.imdbID,
-      languages: languages,
+      languages: query.languages.isEmpty
+        ? nil
+        : query.languages.joined(separator: ","),
       machineTranslated: query.machineTranslated,
       moviehashMatch: query.moviehashMatch,
-      moviehash: moviehash,
+      moviehash: try {
+        if let moviehash = query.moviehash {
+          return moviehash
+        }
+        if let file = utility.file {
+          return try Hash.hash(of: file)
+        }
+        return nil
+      }(),
       orderBy: query.orderBy,
       orderDirection: query.orderDirection,
       page: query.page,
@@ -94,6 +91,7 @@ struct SearchSubtitlesCommand: AsyncParsableCommand {
       userID: query.userID,
       year: query.year
     )
+    let languages = try await client.info.languages()
 
     var printer = formatting.printer(output: output)
 
@@ -130,7 +128,10 @@ struct SearchSubtitlesCommand: AsyncParsableCommand {
         case .imdbID:
           printer.append(entity.attributes.featureDetails?.imdbID)
         case .language:
-          printer.append(entity.attributes.language)
+          let language = languages.data.first { language in
+            language.languageCode == entity.attributes.language
+          }
+          printer.append(language?.languageName)
         case .machineTranslated:
           printer.append(entity.attributes.machineTranslated)
         case .movieName:
