@@ -53,7 +53,7 @@ public struct SubtitlesEntity {
   public let machineTranslated: Bool?
   public let ratings: Double?
   public let release: String?
-  public let uploadDate: String?
+  public let uploadDate: Date?
   public let uploader: Uploader?
   public let votes: Int?
 
@@ -71,7 +71,7 @@ public struct SubtitlesEntity {
     machineTranslated: Bool? = nil,
     ratings: Double? = nil,
     release: String? = nil,
-    uploadDate: String? = nil,
+    uploadDate: Date? = nil,
     uploader: Uploader? = nil,
     votes: Int? = nil
   ) {
@@ -130,7 +130,13 @@ extension SubtitlesEntity: Codable {
     self.machineTranslated = try container.decodeIfPresent(Bool.self, forKey: .machineTranslated)
     self.ratings = try container.decodeIfPresent(Double.self, forKey: .ratings)
     self.release = try container.decodeIfPresent(String.self, forKey: .release)
-    self.uploadDate = try container.decodeIfPresent(String.self, forKey: .uploadDate)
+    self.uploadDate = try {
+      guard let string = try container.decodeIfPresent(String.self, forKey: .uploadDate) else {
+        return nil
+      }
+      let formatter = ISO8601DateFormatter()
+      return formatter.date(from: string)
+    }()
     self.uploader = try container.decodeIfPresent(Uploader.self, forKey: .uploader)
     self.votes = try container.decodeIfPresent(Int.self, forKey: .votes)
   }

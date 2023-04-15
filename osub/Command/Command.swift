@@ -1,4 +1,5 @@
 import ArgumentParser
+import Foundation
 import Client
 import Configuration
 import State
@@ -143,7 +144,7 @@ extension TablePrinter {
 
   mutating func append<T>(_ field: T? = nil) where T: LosslessStringConvertible {
     guard let field else {
-      append()
+      append("?")
       return
     }
     append(String(field))
@@ -151,5 +152,15 @@ extension TablePrinter {
 
   mutating func append<T>(_ field: T? = nil) where T: RawRepresentable<String> {
     append(field?.rawValue)
+  }
+
+  mutating func append(_ field: Date? = nil) {
+    guard let field else {
+      append("?")
+      return
+    }
+    let formatter = DateFormatter()
+    formatter.dateStyle = .long
+    append(formatter.string(from: field))
   }
 }
