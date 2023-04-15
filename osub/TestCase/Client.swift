@@ -98,13 +98,22 @@ public final class MockedAuthenticationService: AuthenticationServiceProtocol {
 }
 
 public final class MockedDownloadsService: DownloadsServiceProtocol {
+
+
   public let mockedPost: (() -> DownloadEntity)?
 
   public init(post: (() -> DownloadEntity)? = nil) {
     self.mockedPost = post
   }
 
-  public func post(fileID: Int) async throws -> DownloadEntity {
+  public func post(
+    fileID: Int,
+    fileName: String? = nil,
+    inFPS: Int? = nil,
+    outFPS: Int? = nil,
+    subFormat: String? = nil,
+    timeshift: Int? = nil
+  ) async throws -> DownloadEntity {
     guard let mockedPost else {
       fatalError("The \(#function) is not implemented.")
     }
