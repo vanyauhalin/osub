@@ -1,32 +1,33 @@
-# osub <!-- omit in toc -->
+# osub
 
-osub is a command line tool for downloading subtitles from [OpenSubtitles](https://www.opensubtitles.com/).
+osub is a command line tool for downloading subtitles from [OpenSubtitles](https://www.opensubtitles.com).
 
-```text
-$ osub auth login --username lynsey --password lawrence
+```sh
+$ osub auth login username password
 The authentication token has been successfully generated.
 ```
 
-```text
+```sh
 $ osub --file Aliens.mp4 --languages en
 
-Printing 4 of 4 subtitles.
+Printing 1 page of 1 for 4 subtitles.
 
-SUBTITLES ID  RELEASE                                                 LANGUAGE  UPLOADED              DOWNLOADS  FILE ID  FILE NAME                                               
-171510        Aliens.1986.Special.Edition.720p.BRRip.XviD.AC3-ViSiON  en        2010-10-30T13:49:48Z  57706      171816   Aliens.1986.Special.Edition.720p.BRRip.XviD.AC3-ViSiON  
-169952        Aliens.1986.Special.Edition.720p.BluRay.x264.DTS-WiKi   en        2010-10-02T10:51:04Z  88136      169957   Aliens.1986.Special.Edition.720p.BluRay.x264.DTS-WiKi.EN
-4749878       Aliens.Vs.Predator.2.PROPER.R3.XViD-BaLD                en        2008-03-02T17:46:23Z  31408      4872906  Aliens.Vs.Predator.2.PROPER.R3.XViD-BaLD                
-177188        Alien[1986]Special Edition BRRip                        en        2014-02-02T04:14:38Z  3956       178825   Alien[1986]Special Edition BRRip                        
+FILE ID  FILE NAME            LANGUAGE  UPLOADED         DOWNLOADS  SUBTITLES ID
+169957   Aliens.1986.Spec...  English   2 October 2010   88136      169952      
+171816   Aliens.1986.Spec...  English   30 October 2010  57706      171510      
+4872906  Aliens.Vs.Predat...  English   2 March 2008     31408      4749878     
+178825   Alien[1986]Speci...  English   2 February 2014  3956       177188      
 ```
 
-```text
+```sh
 $ osub download --file-id 169957
-The subtitles have been successfully downloaded to /Users/vanyauhalin/Downloads/Aliens.1986.Special.Edition.720p.BluRay.x264.DTS-WiKi.EN.srt
+The subtitles have been successfully downloaded to /Users/vanyauhalin/Downloads/
+Aliens.1986.Special.Edition.720p.BluRay.x264.DTS-WiKi.EN.srt
 ```
 
-Feel free to open an [issue](https://github.com/vanyauhalin/osub/issues/), create a [pull request](https://github.com/vanyauhalin/osub/pulls/), or contact me via [email](mailto:vanyauhalin@mail.com) or [Telegram](https://t.me/vanyauhalin/) if you encounter any issues, have any questions, or wish to request a feature. I'll be happy to develop osub with you for us.
+Feel free to open an [issue](https://github.com/vanyauhalin/osub/issues), create a [pull request](https://github.com/vanyauhalin/osub/pulls), or contact me via [email](mailto:vanyauhalin@mail.com) or [Telegram](https://t.me/vanyauhalin) if you encounter any issues, have any questions, or wish to request a feature. I'll be happy to develop osub with you for us.
 
-## Contents <!-- omit in toc -->
+## Contents
 
 - [Installation](#installation)
   - [Using Homebrew](#using-homebrew)
@@ -36,14 +37,32 @@ Feel free to open an [issue](https://github.com/vanyauhalin/osub/issues/), creat
   - [Manage configuration](#manage-configuration)
     - [Configuration locations](#configuration-locations)
     - [Configuration file its values](#configuration-file-its-values)
+    - [`osub config`](#osub-config)
+    - [`osub config get`](#osub-config-get)
+    - [`osub config list`](#osub-config-list)
+    - [`osub config locations`](#osub-config-locations)
+    - [`osub config get`](#osub-config-get)
   - [Manage authentication](#manage-authentication)
-  - [Search for subtitles](#search-for-subtitles)
+    - [`osub auth`](#osub-auth)
+    - [`osub auth list`](#osub-auth-list)
+    - [`osub auth login`](#osub-auth-login)
+    - [`osub auth logout`](#osub-auth-logout)
+    - [`osub auth refresh`](#osub-auth-refresh)
+    - [`osub auth status`](#osub-auth-status)
+  - [Search management](#search-management)
+    - [`osub search`](#osub-search)
+    - [`osub search features`](#osub-search-features)
+    - [`osub search subtitles`](#osub-search-subtitles)
   - [Download subtitles](#download-subtitles)
-  - [Additional utilities](#additional-utilities)
-    - [Calculate the hash of the file](#calculate-the-hash-of-the-file)
-    - [Print a list of languages for subtitles](#print-a-list-of-languages-for-subtitles)
-    - [Print the current osub version](#print-the-current-osub-version)
+    - [`osub download`](#osub-download)
+  - [Manage utilities](#manage-utilities)
+    - [`osub formats`](#osub-formats)
+    - [`osub hash`](#osub-hash)
+    - [`osub languages`](#osub-languages)
+    - [`osub version`](#osub-version)
+  - [Formatting options](#formatting-options)
 - [Contribution](#contribution)
+- [Gratitude](#gratitude)
 - [License](#license)
 
 ## Installation
@@ -52,13 +71,14 @@ At the moment, osub is only available for macOS users. However, there are plans 
 
 ### Using Homebrew
 
-```sh
-brew tap vanyauhalin/osub
+```
+$ brew tap vanyauhalin/osub
+$ brew install osub
 ```
 
 ### Using a release binary
 
-Download the [latest release binary](https://github.com/vanyauhalin/osub/releases/) and unzip it.
+Download the [latest release binary](https://github.com/vanyauhalin/osub/releases) and unzip it.
 
 ### Build from sources
 
@@ -66,139 +86,22 @@ osub is built on the OpenSubtitles REST API, so you will need to obtain an API k
 
 To build, you need the following tools with minimum versions:
 
-- [Xcode 14.0](https://developer.apple.com/xcode/)
-- [Swift 5.7.0](https://www.swift.org/)
-- [Make 3.0](https://www.gnu.org/software/make/)
-- [Tuist 3.12.0](https://tuist.io/)
+- [Xcode 14.0](https://developer.apple.com/xcode)
+- [Swift 5.7.0](https://www.swift.org)
+- [Make 3.0](https://www.gnu.org/software/make)
+- [Tuist 3.12.0](https://tuist.io)
 
 Once you have everything installed, download the source code or clone the Git repository. Then, in the root directory, execute the following command:
 
 ```sh
-make build API_KEY=<your_api_key>
+$ make build API_KEY=<api-key>
 ```
 
 The build result will be in the `.build` directory.
 
 ## Usage
 
-<details>
-  <summary>
-    Show help message.
-  </summary>
-
-```sh
-osub --help
-```
-
-```text
-USAGE: osub <subcommand>
-
-OPTIONS:
-  -h, --help              Show help information.
-
-SUBCOMMANDS:
-  auth                    Manage authentication.
-  config                  Manage configuration.
-  download                Download subtitles.
-  hash                    Calculate the hash of the file.
-  languages               Print a list of languages for subtitles.
-  search (default)        Search for subtitles.
-  version                 Print the current osub version.
-
-  See 'osub help <subcommand>' for detailed help.
-```
-
-</details>
-
 ### Manage configuration
-
-<details>
-  <summary>
-    Show help messages.
-  </summary>
-
-```sh
-osub config --help
-```
-
-```text
-OVERVIEW: Manage configuration.
-
-USAGE: osub config <subcommand>
-
-OPTIONS:
-  -h, --help              Show help information.
-
-SUBCOMMANDS:
-  get                     Print the value of the given configuration key.
-  list                    Print a list of configuration keys and values.
-  locations               Print a locations used by osub.
-  set                     Update the configuration with a value for the given
-                          key.
-
-  See 'osub help config <subcommand>' for detailed help.
-```
-
-```sh
-osub config get --help
-```
-
-```text
-OVERVIEW: Print the value of the given configuration key.
-
-USAGE: osub config get <key>
-
-ARGUMENTS:
-  <key>                   The configuration key.
-
-OPTIONS:
-  -h, --help              Show help information.
-```
-
-```sh
-osub config list --help
-```
-
-```text
-OVERVIEW: Print a list of configuration keys and values.
-
-USAGE: osub config list
-
-OPTIONS:
-  -h, --help              Show help information.
-```
-
-```sh
-osub config locations --help
-```
-
-```text
-OVERVIEW: Print a locations used by osub.
-
-USAGE: osub config locations
-
-OPTIONS:
-  -h, --help              Show help information.
-```
-
-```sh
-osub config set --help
-```
-
-```text
-OVERVIEW: Update the configuration with a value for the given key.
-
-USAGE: osub config set <key> <value>
-
-ARGUMENTS:
-  <key>                   The configuration key.
-  <value>                 The value of the configuration key.
-
-OPTIONS:
-  -h, --help              Show help information.
-```
-
-</details>
 
 osub can run without configuration, so if you wish, you can skip to the [next section](#manage-authentication).
 
@@ -230,21 +133,11 @@ The downloads location:
 | The downloads for the current user      |                 |
 | The home directory for the current user | `Downloads/`    |
 
-To find out which locations are currently in use, it is enough to execute:
-
-```sh
-osub config locations
-```
+To find out which locations are currently in use, refer to the [`osub config locations`](#osub-config-locations) command.
 
 #### Configuration file its values
 
-The configuration values can be manipulated using the following commands:
-
-```sh
-osub config [get|set]
-```
-
-But at the same time, osub supports loading a configuration file in the [TOML](https://toml.io/) format with the following values:
+The configuration values can be manipulated using the [`osub config get`](#osub-config-get) and [`osub config set`](#osub-config-set) commands. But at the same time, osub supports loading a configuration file in the [TOML](https://toml.io) format (`config.toml`) with the following values:
 
 | Value      | Type   | Description                                                                                                                                                                                                                                         |
 | :--------- | :----- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -252,278 +145,291 @@ But at the same time, osub supports loading a configuration file in the [TOML](h
 | `username` | String | The OpenSubtitles account name.                                                                                                                                                                                                                     |
 | `password` | String | The OpenSubtitles account username.                                                                                                                                                                                                                 |
 
+#### `osub config`
+
+Root command for configuration management.
+
+```sh
+$ osub config <subcommand>
+```
+
+#### `osub config get`
+
+Print the [value](#configuration-file-its-values) of the given configuration [key](#configuration-file-its-values).
+
+```sh
+$ osub config get <key>
+```
+
+#### `osub config list`
+
+Print a list of configuration [keys](#configuration-file-its-values) and [values](#configuration-file-its-values).
+
+```sh
+$ osub config list
+```
+
+#### `osub config locations`
+
+Print a [locations](#configuration-locations) used by osub.
+
+```sh
+$ osub config locations
+```
+
+#### `osub config get`
+
+Update the configuration with a [value](#configuration-file-its-values) for the given [key](#configuration-file-its-values).
+
+```sh
+$ osub config set <key> <value>
+```
+
 ### Manage authentication
 
-<details>
-  <summary>
-    Show help messages.
-  </summary>
+In order to be able to download subtitles, you must [log in](#osub-auth-login). Once you are authorized, a token will be generated and saved for future use. Simply [refresh](#osub-auth-refresh) the token when necessary.
+
+#### `osub auth`
+
+Root command for authentication management.
 
 ```sh
-osub auth --help
+$ osub auth <subcommand>
 ```
 
-```text
-OVERVIEW: Manage authentication.
+#### `osub auth list`
 
-USAGE: osub auth <subcommand>
-
-OPTIONS:
-  -h, --help              Show help information.
-
-SUBCOMMANDS:
-  list                    Print a list of authentication keys and values.
-  login                   Login by generating an authentication token.
-  logout                  Logout by destroying the authentication token.
-  refresh                 Refresh the authentication token.
-  status                  Print authentication status.
-
-  See 'osub help auth <subcommand>' for detailed help.
-```
+Print a list of authentication keys and values.
 
 ```sh
-osub auth list --help
+$ osub auth list
 ```
+  
+#### `osub auth login`
 
-```text
-OVERVIEW: Print a list of authentication keys and values.
-
-USAGE: osub auth list
-
-OPTIONS:
-  -h, --help              Show help information.
-```
+Login by generating an authentication token.
 
 ```sh
-osub auth login --help
+$ osub auth login <username> <password>
 ```
 
-```text
-OVERVIEW: Login by generating an authentication token.
+#### `osub auth logout`
 
-USAGE: osub auth login <username> <password>
-
-ARGUMENTS:
-  <username>              The account name.
-  <password>              The account password.
-
-OPTIONS:
-  -h, --help              Show help information.
-```
+Logout by destroying the authentication token.
 
 ```sh
-osub auth logout --help
+$ osub auth logout
 ```
 
-```text
-OVERVIEW: Logout by destroying the authentication token.
+#### `osub auth refresh`
 
-USAGE: osub auth logout
-
-OPTIONS:
-  -h, --help              Show help information.
-```
+Refresh the authentication token.
 
 ```sh
-osub auth refresh --help
+$ osub auth refresh
 ```
 
-```text
-OVERVIEW: Refresh the authentication token.
+#### `osub auth status`
 
-USAGE: osub auth refresh
-
-OPTIONS:
-  -h, --help              Show help information.
-```
+Print authentication status.
 
 ```sh
-osub auth status --help
+$ osub auth status
 ```
 
-```text
-OVERVIEW: Print authentication status.
+### Search management
 
-USAGE: osub auth status
+With osub, you can search for both subtitles and features. A feature refers to a movie, TV show, or episode of a TV show.
 
-OPTIONS:
-  -h, --help              Show help information.
-```
+#### `osub search`
 
-</details>
-
-### Search for subtitles
-
-<details>
-  <summary>
-    Show help messages.
-  </summary>
+Root command for search management.
 
 ```sh
-osub search --help
+$ osub search <subcommand>
 ```
 
-```text
-OVERVIEW: Search for subtitles.
+#### `osub search features`
 
-USAGE: osub search <subcommand>
-
-OPTIONS:
-  -h, --help              Show help information.
-
-SUBCOMMANDS:
-  subtitles (default)     Search for subtitles.
-
-  See 'osub help search <subcommand>' for detailed help.
-```
+Search for features.
 
 ```sh
-osub search subtitles --help
+$ osub search features <options>
 ```
 
-```text
-OVERVIEW: Search for subtitles.
+Query options:
 
-USAGE: osub search subtitles [--file <path>] [--languages <string>]
+- `--feature-id <int>`  
+Search by feature ID.
+- `--imdb-id <string>`  
+Search by feature IMDB ID.
+- `--query <string>`  
+Search by file name or string query.
+- `--tmdb-id <string>`  
+Search by feature TMDB ID.
+- `--type <enum>`  
+Search on feature type: `episode`, `movie` or `tvshow`.
+- `--year <int>`  
+Search by year.
 
-OPTIONS:
-  -f, --file <path>       The path to the file that needs subtitles.
-  -l, --languages <string>
-                          Comma-separated list of subtag languages for
-                          subtitles.
-  -h, --help              Show help information.
+#### `osub search subtitles`
+
+Search for subtitles.
+
+```sh
+$ osub search subtitles <options>
 ```
 
-</details>
+Query options:
+
+- `--ai-translated <enum>`  
+Restrict search to AI-translated subtitles: `exclude` or `include`.
+- `--episode-number <int>`  
+Search by TV Show episode number.
+- `--foreign-parts-only <enum>`  
+Restrict search to Foreign Parts Only (FPO) subtitles: `exclude`, `include` or `only`.
+- `--hearing-impaired <enum>`  
+Restrict search to subtitles for the hearing impaired: `exclude`, `include` or `only`.
+- `--id <int>`  
+Search by feature ID from the features search results.
+- `--imdb-id <int>`  
+Search by feature IMDB ID.
+- `--languages <[string]>`  
+Search on space-separated list of subtag languages.
+- `--machine-translated <enum>`  
+Restrict search to machine-translated subtitles: `exclude` or `include`.
+- `--moviehash-match <enum>`  
+Restrict search to subtitles with feature hash match: `include` and `only`.
+- `--moviehash <string>`  
+Search by feature hash.
+- `--order-by <enum>`  
+Order of returned results by field: `ai_translated`, `download_count`, `foreign_parts_only`, `fps`, `from_trusted`, `hd`, `hearing_impaired`, `language`, `machine_translated`, `points`, `ratings`, `release`, `upload_date`, `votes`.
+- `--order-direction <enum>`  
+Order of returned results by direction: `asc` or `desc`.
+- `--page <int>`  
+Search on the page.
+- `--parent-feature-id <int>`  
+Search for the TV Show by parent feature ID from the features search results.
+- `--parent-imdb-id <int>`  
+Search for the TV Show by parent IMDB ID.
+- `--parent-tmdb-id <int>`  
+Search for the TV Show by parent TMDB ID.
+- `--query <string>`  
+Search by file name or string query.
+- `--season-number <int>`  
+Search for the TV Show by season number.
+- `--tmdb-id <int>`  
+Search by feature TMDB ID.
+- `--trusted-sources <enum>`  
+Restrict search to trusted sources: `include` or `only`.
+- `--type <enum>`  
+Restrict search to feature type: `episode`, `movie` or `tvshow`.
+- `--user-id <int>`  
+Search for uploaded subtitles by user ID.
+- `--year <int>`  
+Search by year.
+
+Utility options:
+
+- `--file <path>`  
+The path to the file that needs subtitles.
 
 ### Download subtitles
 
-<details>
-  <summary>
-    Show help message.
-  </summary>
+#### `osub download`
+
+Root command for download subtitles.
 
 ```sh
-osub download --help
+$ osub download --file-id <int> <options>
 ```
 
-```text
-OVERVIEW: Download subtitles.
+Query options:
 
-USAGE: osub download --file-id <int>
+- `--file-id <int>`  
+File ID from subtitles search results.
+- `--file-name <string>`  
+Desired subtitle file name to save on disk.
+- `--in-fps <int>`  
+Input FPS for subtitles.
+- `--out-fps <int>`  
+Output FPS for subtitles.
+- `--sub-format <string>`  
+Subtitles format from formats results.
+- `--timeshift <int>`  
+Timeshift for subtitles.
 
-OPTIONS:
-  -f, --file-id <int>     The file ID from subtitles search results.
-  -h, --help              Show help information.
-```
+### Utility commands
 
-</details>
+Besides the primary commands, osub also includes some useful utility commands.
 
-### Additional utilities
+#### `osub formats`
 
-#### Calculate the hash of the file
-
-<details>
-  <summary>
-    Show help message.
-  </summary>
+Print a list of formats for subtitles.
 
 ```sh
-osub hash --help
+$ osub formats
 ```
 
-```text
-OVERVIEW: Calculate the hash of the file.
+#### `osub hash`
 
-USAGE: osub hash <path>
-
-ARGUMENTS:
-  <path>                  The path to the file whose hash is to be calculated.
-
-OPTIONS:
-  -h, --help              Show help information.
-```
-
-</details>
-
-OpenSubtitles uses a special hash function to match subtitle files against movie files. The hash is not dependent on the file name of the movie file. To learn more about this function, refer to the [official documentation](https://trac.opensubtitles.org/projects/opensubtitles/wiki/HashSourceCodes/).
-
-#### Print a list of languages for subtitles
-
-<details>
-  <summary>
-    Show help message.
-  </summary>
+Calculate the hash of the file.
 
 ```sh
-osub languages --help
+$ osub hash <path>
 ```
 
-```text
-OVERVIEW: Print a list of languages for subtitles.
+#### `osub languages`
 
-USAGE: osub languages
-
-OPTIONS:
-  -h, --help              Show help information.
-```
-
-</details>
-
-#### Print the current osub version
-
-<details>
-  <summary>
-    Show help message.
-  </summary>
+Print a list of languages for subtitles.
 
 ```sh
-osub version --help
+$ osub languages
 ```
 
-```text
-OVERVIEW: Print the current osub version.
+#### `osub version`
 
-USAGE: osub version
+Print the current osub version.
 
-OPTIONS:
-  -h, --help              Show help information.
+```sh
+$ osub version
 ```
 
-</details>
+### Formatting options
+
+Some commands offer simple formatting options:
+
+- `--fields <[enum]>`  
+Space-separated list of fields to print.
+- `--frame/--no-frame`  
+Consider the window size when formatting.
+
+To view a list of available fields, run an invalid command with the `--fields` option, for example:
+
+```sh
+$ osub <subcommand> --fields ?
+```
 
 ## Contribution
 
-<details>
-  <summary>
-    Show help message.
-  </summary>
+To contribute, you need the following tools with minimum versions:
+
+- [Xcode 14.0](https://developer.apple.com/xcode)
+- [Swift 5.7.0](https://www.swift.org)
+- [Make 3.0](https://www.gnu.org/software/make)
+- [Tuist 3.12.0](https://tuist.io)
+- [SwiftLint 0.50.0](https://realm.github.io/SwiftLint) — optional, but recommended.
+
+Once you have everything installed, in the root directory, execute the following commands:
 
 ```sh
-make help
+$ make install
+$ make dev
 ```
 
-```text
-OVERVIEW: Welcome to the vanyauhalin/osub sources.
+## Gratitude
 
-USAGE: make <subcommand> [argument=value]
-
-SUBCOMMANDS:
-  build       Build the osub via Tuist.
-  clean       Clean generated Tuist files.
-  dev         Generate a development workspace via Tuist.
-  help        Show this message.
-  install     Install dependencies via Tuist.
-  lint        Lint the osub via SwiftLint.
-  test        Test the osub via Tuist.
-  version     Print the current osub version.
-
-ARGUMENTS:
-  API_KEY     Specify a API key for the build command.
-  target      Specify a target for the lint command.
-```
-
-</details>
+I would like to express my gratitude to the OpenSubtitles team for providing such an great service. I also extend my appreciation to the authors of the wrappers, applications, and scripts that utilized the OpenSubtitles REST API. It was interesting to study your work. Furthermore, I would like to thank the authors of the [GitHub CLI](https://cli.github.com), whose product was a significant source of inspiration for me.
 
 ## License
 
