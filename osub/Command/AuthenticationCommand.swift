@@ -202,7 +202,8 @@ extension AuthenticationRefreshCommand {
 struct AuthenticationStatusCommand: AsyncParsableCommand {
   static let configuration = CommandConfiguration(
     commandName: "status",
-    abstract: "Print authentication status."
+    abstract: "Print authentication status.",
+    discussion: "osub auth status <options>"
   )
 
   @OptionGroup(title: "Formatting Options")

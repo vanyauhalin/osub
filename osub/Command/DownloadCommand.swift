@@ -8,17 +8,12 @@ import State
 struct DownloadCommand: AsyncParsableCommand {
   static let configuration = CommandConfiguration(
     commandName: "download",
-    abstract: "Download subtitles."
+    abstract: "Download subtitles.",
+    discussion: "osub download --file-id <int> <options>"
   )
 
-  @Option(
-    name: .shortAndLong,
-    help: ArgumentHelp(
-      "The file ID from subtitles search results.",
-      valueName: .int
-    )
-  )
-  var fileID: Int
+  @OptionGroup(title: "Query Options")
+  var query: QueryOptions
 
   var output = StandardTextOutputStream.shared
   var configManager: ConfigurationManagerProtocol = ConfigurationManager.shared
@@ -38,7 +33,15 @@ struct DownloadCommand: AsyncParsableCommand {
   }
 
   mutating func action() async throws {
-    let download = try await client.downloads.post(fileID: fileID)
+    let download = try await client.downloads.post(
+      fileID: query.fileID,
+      fileName: query.fileName,
+      inFPS: query.inFPS,
+      outFPS: query.outFPS,
+      subFormat: query.subFormat,
+      timeshift: query.timeshift
+    )
+
     guard let url = download.link else {
       throw DownloadCommandError.fileURLUnavailable
     }
@@ -55,7 +58,59 @@ struct DownloadCommand: AsyncParsableCommand {
 
 extension DownloadCommand {
   enum CodingKeys: CodingKey {
-    case fileID
+    case query
+  }
+
+  struct QueryOptions: ParsableArguments {
+    @Option(
+      help: ArgumentHelp(
+        "File ID from subtitles search results.",
+        valueName: .int
+      )
+    )
+    var fileID: Int
+
+    @Option(
+      help: ArgumentHelp(
+        "Desired subtitle file name to save on disk.",
+        valueName: .string
+      )
+    )
+    var fileName: String?
+
+    @Option(
+      name: .customLong("in-fps"),
+      help: ArgumentHelp(
+        "Input FPS for subtitles.",
+        valueName: .int
+      )
+    )
+    var inFPS: Int?
+
+    @Option(
+      name: .customLong("out-fps"),
+      help: ArgumentHelp(
+        "Output FPS for subtitles.",
+        valueName: .int
+      )
+    )
+    var outFPS: Int?
+
+    @Option(
+      help: ArgumentHelp(
+        "Subtitles format from formats results.",
+        valueName: .string
+      )
+    )
+    var subFormat: String?
+
+    @Option(
+      help: ArgumentHelp(
+        "Timeshift for subtitles.",
+        valueName: .int
+      )
+    )
+    var timeshift: Int?
   }
 }
 
