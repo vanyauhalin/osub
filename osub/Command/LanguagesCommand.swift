@@ -56,15 +56,15 @@ extension LanguagesCommand {
   }
 
   enum Field: String, FormattingField {
-    case languageName = "language_name"
-    case languageCode = "language_code"
-
     static var defaultValues: [Self] {
       [
         .languageCode,
         .languageName
       ]
     }
+
+    case languageName = "language_name"
+    case languageCode = "language_code"
 
     var text: String {
       switch self {

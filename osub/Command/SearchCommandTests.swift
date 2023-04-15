@@ -7,6 +7,57 @@ import State
 import TestCase
 import XCTest
 
+final class SearchFeaturesCommandTests: XCTestCase {
+  func testRuns() async throws {
+    let output = MockedTextOutputStream()
+    var command = try SearchFeaturesCommand.parse(["--no-frame"])
+    command.output = output
+    command.configManager = MockedConfigurationManager(
+      load: {
+        Configuration()
+      }
+    )
+    command.stateManager = MockedStateManager(
+      load: {
+        State()
+      }
+    )
+    command.client = MockedClient(
+      search: MockedSearchService(
+        features: {
+          DatumedEntity(
+            data: [
+              AttributedEntity(
+                id: 126826,
+                attributes: FeatureEntity(
+                  episodeNumber: 4,
+                  featureType: .episode,
+                  imdbID: 1218285,
+                  parentIMDBID: 259733,
+                  parentTitle: "Waking the Dead",
+                  seasonNumber: 7,
+                  title: "Waking",
+                  tmdbID: 344533,
+                  year: 2008
+                )
+              )
+            ]
+          )
+        }
+      )
+    )
+    try await command.run()
+    XCTAssertEqual(
+      output.string,
+      """
+      \nPrinting 1 features.\n
+      FEATURE ID  TITLE   FEATURE TYPE  IMDB ID  INDEX   PARENT TITLE\("   ")
+      126826      Waking  Episode       1218285  S07E04  Waking the Dead\n
+      """
+    )
+  }
+}
+
 final class SearchSubtitlesCommandTests: XCTestCase {
   func testRuns() async throws {
     let output = MockedTextOutputStream()

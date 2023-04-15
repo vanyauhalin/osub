@@ -2,6 +2,16 @@ import Foundation
 
 public protocol SearchServiceProtocol {
   // swiftlint:disable:next function_parameter_count
+  func features(
+    featureID: Int?,
+    imdbID: String?,
+    query: String?,
+    tmdbID: Int?,
+    type: SearchServiceType?,
+    year: Int?
+  ) async throws -> DatumedEntity<[AttributedEntity<FeatureEntity>]>
+
+  // swiftlint:disable:next function_parameter_count
   func subtitles(
     aiTranslated: SearchSubtitlesAITranslated?,
     episodeNumber: Int?,
@@ -35,6 +45,128 @@ public final class SearchService: Service, SearchServiceProtocol {
   init(client: ClientProtocol) {
     self.client = client
   }
+}
+
+// MARK: Features
+
+public struct FeatureEntity {
+  public let episodeNumber: Int?
+  public let featureType: FeatureType?
+  public let imdbID: Int?
+  public let parentIMDBID: Int?
+  public let parentTitle: String?
+  public let seasonNumber: Int?
+  public let title: String?
+  public let tmdbID: Int?
+  public let year: Int?
+
+  public init(
+    episodeNumber: Int? = nil,
+    featureType: FeatureType? = nil,
+    imdbID: Int? = nil,
+    parentIMDBID: Int? = nil,
+    parentTitle: String? = nil,
+    seasonNumber: Int? = nil,
+    title: String? = nil,
+    tmdbID: Int? = nil,
+    year: Int? = nil
+  ) {
+    self.episodeNumber = episodeNumber
+    self.featureType = featureType
+    self.imdbID = imdbID
+    self.parentIMDBID = parentIMDBID
+    self.parentTitle = parentTitle
+    self.seasonNumber = seasonNumber
+    self.title = title
+    self.tmdbID = tmdbID
+    self.year = year
+  }
+}
+
+extension FeatureEntity: Decodable {
+  enum CodingKeys: String, CodingKey {
+    case episodeNumber = "episode_number"
+    case featureType = "feature_type"
+    case imdbID = "imdb_id"
+    case parentIMDBID = "parent_imdb_id"
+    case parentTitle = "parent_title"
+    case seasonNumber = "season_number"
+    case title
+    case tmdbID = "tmdb_id"
+    case year
+  }
+
+  public init(from decoder: Decoder) throws {
+    let container = try decoder.container(keyedBy: CodingKeys.self)
+    self.episodeNumber = try container.decodeIfPresent(Int.self, forKey: .episodeNumber)
+    self.featureType = try container.decodeIfPresent(FeatureType.self, forKey: .featureType)
+    self.imdbID = try container.decodeIfPresent(Int.self, forKey: .imdbID)
+    self.parentIMDBID = try container.decodeIfPresent(Int.self, forKey: .parentIMDBID)
+    self.parentTitle = try container.decodeIfPresent(String.self, forKey: .parentTitle)
+    self.seasonNumber = try container.decodeIfPresent(Int.self, forKey: .seasonNumber)
+    self.title = try container.decodeIfPresent(String.self, forKey: .title)
+    self.tmdbID = try container.decodeIfPresent(Int.self, forKey: .tmdbID)
+    self.year = try {
+      guard let string = try container.decodeIfPresent(String.self, forKey: .year) else {
+        return nil
+      }
+      return Int(string)
+    }()
+  }
+}
+
+public enum FeatureType: String, Decodable {
+  case episode = "Episode"
+  case movie = "Movie"
+  case tvshow = "Tvshow"
+}
+
+extension SearchService {
+  public func features(
+    featureID: Int? = nil,
+    imdbID: String? = nil,
+    query: String? = nil,
+    tmdbID: Int? = nil,
+    type: SearchServiceType? = nil,
+    year: Int? = nil
+  ) async throws -> DatumedEntity<[AttributedEntity<FeatureEntity>]> {
+    let client = try refer()
+
+    var queryItems: [URLQueryItem] = []
+    if let featureID {
+      queryItems.append(URLQueryItem(name: "feature_id", value: featureID))
+    }
+    if let imdbID {
+      queryItems.append(URLQueryItem(name: "imdb_id", value: imdbID))
+    }
+    if let query {
+      queryItems.append(URLQueryItem(name: "query", value: query))
+    }
+    if let tmdbID {
+      queryItems.append(URLQueryItem(name: "tmdb_id", value: tmdbID))
+    }
+    if let type {
+      queryItems.append(URLQueryItem(name: "type", value: type))
+    }
+    if let year {
+      queryItems.append(URLQueryItem(name: "year", value: year))
+    }
+
+    let url = try client.url(path: "features", with: queryItems)
+    let request = client
+      .request(url: url)
+      .httpMethod(.get)
+    return try await client.entity(
+      DatumedEntity<[AttributedEntity<FeatureEntity>]>.self,
+      from: request
+    )
+  }
+}
+
+public enum SearchServiceType: String, Decodable {
+  case episode
+  case movie
+  case tvshow
 }
 
 // MARK: Subtitles
@@ -94,7 +226,7 @@ public struct SubtitlesEntity {
   }
 }
 
-extension SubtitlesEntity: Codable {
+extension SubtitlesEntity: Decodable {
   enum CodingKeys: String, CodingKey {
     case aiTranslated = "ai_translated"
     case downloadCount = "download_count"
@@ -188,7 +320,7 @@ public struct FeatureDetails {
   }
 }
 
-extension FeatureDetails: Codable {
+extension FeatureDetails: Decodable {
   enum CodingKeys: String, CodingKey {
     case episodeNumber = "episode_number"
     case featureID = "feature_id"
@@ -204,12 +336,6 @@ extension FeatureDetails: Codable {
     case tmdbID = "tmdb_id"
     case year
   }
-}
-
-public enum FeatureType: String, Codable {
-  case episode = "Episode"
-  case movie = "Movie"
-  case tvshow = "Tvshow"
 }
 
 public struct File {

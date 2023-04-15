@@ -5,6 +5,51 @@ import TestCase
 import XCTest
 
 final class SearchServiceTests: URLProtocolTestCase {
+  func testFeatures() async throws {
+    let url = URL(string: "http://localhost/features")
+    let data = """
+      {
+        "data": [
+          {
+            "id": "126826",
+            "attributes": {
+              "title": "Waking",
+              "year": "2008",
+              "parent_title": "Waking the Dead",
+              "season_number": 7,
+              "episode_number": 4,
+              "imdb_id": 1218285,
+              "tmdb_id": 344533,
+              "parent_imdb_id": 259733,
+              "feature_type": "Episode"
+            }
+          }
+        ]
+      }
+      """
+      .data(using: .utf8)
+    let response = HTTPURLResponse(url: url, statusCode: 200)
+    MockedURLProtocol.urls[url] = (data, response, nil)
+
+    let client = Client(session: MockedURLProtocol.session)
+    client.configure(baseURL: URL(string: "http://localhost/"))
+    let service = SearchService(client: client)
+    let features = try await service.features()
+
+    XCTAssertEqual(features.data[0].id, 126826)
+
+    let attributes = features.data[0].attributes
+    XCTAssertEqual(attributes.title, "Waking")
+    XCTAssertEqual(attributes.year, 2008)
+    XCTAssertEqual(attributes.parentTitle, "Waking the Dead")
+    XCTAssertEqual(attributes.seasonNumber, 7)
+    XCTAssertEqual(attributes.episodeNumber, 4)
+    XCTAssertEqual(attributes.imdbID, 1218285)
+    XCTAssertEqual(attributes.tmdbID, 344533)
+    XCTAssertEqual(attributes.parentIMDBID, 259733)
+    XCTAssertEqual(attributes.featureType, .episode)
+  }
+
   func testSubtitles() async throws {
     let url = URL(string: "http://localhost/subtitles")
     let data = """
