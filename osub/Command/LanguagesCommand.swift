@@ -36,9 +36,9 @@ struct LanguagesCommand: AsyncParsableCommand {
     languages.data.enumerated().forEach { index, language in
       formatting.fields.forEach { field in
         switch field {
-        case .name:
+        case .languageName:
           printer.append(language.languageName)
-        case .subtag:
+        case .languageCode:
           printer.append(language.languageCode)
         }
       }
@@ -56,18 +56,23 @@ extension LanguagesCommand {
   }
 
   enum Field: String, FormattingField {
-    case name
-    case subtag
+    case languageName = "language_name"
+    case languageCode = "language_code"
 
     static var defaultValues: [Self] {
       [
-        .subtag,
-        .name
+        .languageCode,
+        .languageName
       ]
     }
 
     var text: String {
-      rawValue
+      switch self {
+      case .languageName:
+        return "name"
+      case .languageCode:
+        return "subtag"
+      }
     }
   }
 }
