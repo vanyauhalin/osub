@@ -49,19 +49,42 @@ extension InformationService {
 // MARK: User
 
 public struct UserEntity {
-  public let userID: Int?
+  public let allowedDownloads: Int?
+  public let downloadsCount: Int?
+  public let extInstalled: Bool?
+  public let level: String?
   public let remainingDownloads: Int?
+  public let userID: Int?
+  public let vip: Bool?
 
-  public init(userID: Int? = nil, remainingDownloads: Int? = nil) {
-    self.userID = userID
+  public init(
+    allowedDownloads: Int? = nil,
+    downloadsCount: Int? = nil,
+    extInstalled: Bool? = nil,
+    level: String? = nil,
+    remainingDownloads: Int? = nil,
+    userID: Int? = nil,
+    vip: Bool? = nil
+  ) {
+    self.allowedDownloads = allowedDownloads
+    self.downloadsCount = downloadsCount
+    self.extInstalled = extInstalled
+    self.level = level
     self.remainingDownloads = remainingDownloads
+    self.userID = userID
+    self.vip = vip
   }
 }
 
 extension UserEntity: Decodable {
   enum CodingKeys: String, CodingKey {
-    case userID = "user_id"
+    case allowedDownloads = "allowed_downloads"
+    case downloadsCount = "downloads_count"
+    case extInstalled = "ext_installed"
+    case level
     case remainingDownloads = "remaining_downloads"
+    case userID = "user_id"
+    case vip
   }
 }
 

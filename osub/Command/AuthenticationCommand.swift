@@ -230,10 +230,20 @@ struct AuthenticationStatusCommand: AsyncParsableCommand {
     var printer = formatting.printer(output: output)
     formatting.fields.forEach { field in
       switch field {
+      case .allowedDownloads:
+        printer.append(user.data.allowedDownloads)
+      case .downloadsCount:
+        printer.append(user.data.downloadsCount)
+      case .extInstalled:
+        printer.append(user.data.extInstalled)
+      case .level:
+        printer.append(user.data.level)
       case .remainingDownloads:
         printer.append(user.data.remainingDownloads)
       case .userID:
         printer.append(user.data.userID)
+      case .vip:
+        printer.append(user.data.vip)
       }
     }
     printer.print()
@@ -246,22 +256,39 @@ extension AuthenticationStatusCommand {
   }
 
   enum Field: String, FormattingField {
+    case allowedDownloads = "allowed_downloads"
+    case downloadsCount = "downloads_count"
+    case extInstalled = "ext_installed"
+    case level
     case remainingDownloads = "remaining_downloads"
     case userID = "user_id"
+    case vip
 
     static var defaultValues: [Self] {
       [
         .userID,
-        .remainingDownloads
+        .remainingDownloads,
+        .allowedDownloads,
+        .level
       ]
     }
 
     var text: String {
       switch self {
+      case .allowedDownloads:
+        return "allowed downloads"
+      case .downloadsCount:
+        return "downloads"
+      case .extInstalled:
+        return "extension installed"
+      case .level:
+        return rawValue
       case .remainingDownloads:
         return "remaining downloads"
       case .userID:
         return "user id"
+      case .vip:
+        return rawValue
       }
     }
   }

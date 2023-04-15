@@ -1,3 +1,4 @@
+// swiftlint:disable xct_specific_matcher
 @testable
 import Client
 import TestCase
@@ -33,8 +34,13 @@ final class InformationServiceTests: URLProtocolTestCase {
     let data = """
       {
         "data": {
-          "user_id": 9000,
-          "remaining_downloads": 20
+          "allowed_downloads": 100,
+          "level": "Sub leecher",
+          "user_id": 66,
+          "ext_installed": false,
+          "vip": false,
+          "downloads_count": 1,
+          "remaining_downloads": 99
         }
       }
       """
@@ -46,7 +52,12 @@ final class InformationServiceTests: URLProtocolTestCase {
     client.configure(baseURL: URL(string: "http://localhost/"))
     let service = InformationService(client: client)
     let user = try await service.user()
-    XCTAssertEqual(user.data.userID, 9000)
-    XCTAssertEqual(user.data.remainingDownloads, 20)
+    XCTAssertEqual(user.data.allowedDownloads, 100)
+    XCTAssertEqual(user.data.level, "Sub leecher")
+    XCTAssertEqual(user.data.userID, 66)
+    XCTAssertEqual(user.data.extInstalled, false)
+    XCTAssertEqual(user.data.vip, false)
+    XCTAssertEqual(user.data.downloadsCount, 1)
+    XCTAssertEqual(user.data.remainingDownloads, 99)
   }
 }
