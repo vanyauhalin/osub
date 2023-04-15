@@ -122,15 +122,25 @@ public final class MockedDownloadsService: DownloadsServiceProtocol {
 }
 
 public final class MockedInformationService: InformationServiceProtocol {
+  public let mockedFormats: (() -> DatumedEntity<FormatsEntity>)?
   public let mockedLanguages: (() -> DatumedEntity<[LanguageEntity]>)?
   public let mockedUser: (() -> DatumedEntity<UserEntity>)?
 
   public init(
+    formats: (() -> DatumedEntity<FormatsEntity>)? = nil,
     languages: (() -> DatumedEntity<[LanguageEntity]>)? = nil,
     user: (() -> DatumedEntity<UserEntity>)? = nil
   ) {
+    self.mockedFormats = formats
     self.mockedLanguages = languages
     self.mockedUser = user
+  }
+
+  public func formats() async throws -> DatumedEntity<FormatsEntity> {
+    guard let mockedFormats else {
+      fatalError("The \(#function) is not implemented.")
+    }
+    return mockedFormats()
   }
 
   public func languages() async throws -> DatumedEntity<[LanguageEntity]> {

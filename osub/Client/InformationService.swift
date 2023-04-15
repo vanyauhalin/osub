@@ -1,6 +1,7 @@
 import Foundation
 
 public protocol InformationServiceProtocol {
+  func formats() async throws -> DatumedEntity<FormatsEntity>
   func languages() async throws -> DatumedEntity<[LanguageEntity]>
   func user() async throws -> DatumedEntity<UserEntity>
 }
@@ -10,6 +11,42 @@ public final class InformationService: Service, InformationServiceProtocol {
 
   init(client: ClientProtocol) {
     self.client = client
+  }
+}
+
+// MARK: Formats
+
+public struct FormatsEntity {
+  public let outputFormats: [String]
+
+  public init(outputFormats: [String] = []) {
+    self.outputFormats = outputFormats
+  }
+}
+
+extension FormatsEntity: Decodable {
+  enum CodingKeys: String, CodingKey {
+    case outputFormats = "output_formats"
+  }
+
+  public init(from decoder: Decoder) throws {
+    let container = try decoder.container(keyedBy: CodingKeys.self)
+    // swiftlint:disable:next line_length
+    self.outputFormats = (try container.decodeIfPresent([String].self, forKey: .outputFormats)) ?? []
+  }
+}
+
+extension InformationService {
+  public func formats() async throws -> DatumedEntity<FormatsEntity> {
+    let client = try refer()
+    let url = try client.url(path: "infos/formats")
+    let request = client
+      .request(url: url)
+      .httpMethod(.get)
+    return try await client.entity(
+      DatumedEntity<FormatsEntity>.self,
+      from: request
+    )
   }
 }
 
