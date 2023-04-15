@@ -80,7 +80,7 @@ final class SearchServiceTests: URLProtocolTestCase {
     XCTAssertEqual(attributes.ratings, 6)
     XCTAssertEqual(attributes.fromTrusted, true)
     XCTAssertEqual(attributes.foreignPartsOnly, false)
-    XCTAssertEqual(attributes.uploadDate, "2009-09-04T19:36:00Z")
+    XCTAssertEqual(attributes.uploadDate?.timeIntervalSince1970, 1252092960)
     XCTAssertEqual(attributes.aiTranslated, false)
     XCTAssertEqual(attributes.machineTranslated, false)
     XCTAssertEqual(attributes.release, "Season 1 (Whole) DVDrip.XviD-SAiNTS")

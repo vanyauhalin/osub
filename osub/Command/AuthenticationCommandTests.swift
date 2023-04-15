@@ -206,8 +206,13 @@ final class AuthenticationCommandStatusTests: XCTestCase {
         user: {
           DatumedEntity(
             data: UserEntity(
-              userID: 9000,
-              remainingDownloads: 20
+              allowedDownloads: 100,
+              downloadsCount: 1,
+              extInstalled: false,
+              level: "Sub leecher",
+              remainingDownloads: 99,
+              userID: 66,
+              vip: false
             )
           )
         }
@@ -217,8 +222,8 @@ final class AuthenticationCommandStatusTests: XCTestCase {
     XCTAssertEqual(
       output.string,
       """
-      USER ID  REMAINING DOWNLOADS
-      9000     20                 \n
+      USER ID  REMAINING DOWNLOADS  ALLOWED DOWNLOADS  LEVEL\("      ")
+      66       99                   100                Sub leecher\n
       """
     )
   }

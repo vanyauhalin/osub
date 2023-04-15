@@ -23,6 +23,18 @@ final class SearchSubtitlesCommandTests: XCTestCase {
       }
     )
     command.client = MockedClient(
+      info: MockedInformationService(
+        languages: {
+          DatumedEntity(
+            data: [
+              LanguageEntity(
+                languageCode: "en",
+                languageName: "English"
+              )
+            ]
+          )
+        }
+      ),
       search: MockedSearchService(
         subtitles: {
           PaginatedEntity(
@@ -38,7 +50,7 @@ final class SearchSubtitlesCommandTests: XCTestCase {
                     )
                   ],
                   language: "en",
-                  uploadDate: "2010-10-30T13:49:48Z"
+                  uploadDate: Date(timeIntervalSince1970: 1252092960)
                 )
               )
             ],
@@ -48,16 +60,14 @@ final class SearchSubtitlesCommandTests: XCTestCase {
       )
     )
     try await command.run()
-    // swiftlint:disable line_length
     XCTAssertEqual(
       output.string,
       """
       \nPrinting 1 page of 2 for 60 subtitles.\n
-      FILE ID  FILE NAME                    LANGUAGE  UPLOADED              DOWNLOADS  SUBTITLES ID
-      171816   Aliens.1986.Special.Edition  en        2010-10-30T13:49:48Z  57706      171510      \n
+      FILE ID  FILE NAME                    LANGUAGE  UPLOADED          DOWNLOADS  SUBTITLES ID
+      171816   Aliens.1986.Special.Edition  English   4 September 2009  57706      171510      \n
       """
     )
-    // swiftlint:enable line_length
   }
 
   func testThrowsAnErrorIfPassedTheFileAndMovehashOptions() {
