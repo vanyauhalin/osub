@@ -98,8 +98,6 @@ public final class MockedAuthenticationService: AuthenticationServiceProtocol {
 }
 
 public final class MockedDownloadsService: DownloadsServiceProtocol {
-
-
   public let mockedPost: (() -> DownloadEntity)?
 
   public init(post: (() -> DownloadEntity)? = nil) {
@@ -159,12 +157,29 @@ public final class MockedInformationService: InformationServiceProtocol {
 }
 
 public final class MockedSearchService: SearchServiceProtocol {
+  public let mockedFeatures: (() -> DatumedEntity<[AttributedEntity<FeatureEntity>]>)?
   public let mockedSubtitles: (() -> PaginatedEntity<AttributedEntity<SubtitlesEntity>>)?
 
   public init(
+    features: (() -> DatumedEntity<[AttributedEntity<FeatureEntity>]>)? = nil,
     subtitles: (() -> PaginatedEntity<AttributedEntity<SubtitlesEntity>>)? = nil
   ) {
+    self.mockedFeatures = features
     self.mockedSubtitles = subtitles
+  }
+
+  public func features(
+    featureID: Int? = nil,
+    imdbID: String? = nil,
+    query: String? = nil,
+    tmdbID: Int? = nil,
+    type: SearchServiceType? = nil,
+    year: Int? = nil
+  ) async throws -> DatumedEntity<[AttributedEntity<FeatureEntity>]> {
+    guard let mockedFeatures else {
+      fatalError("The \(#function) is not implemented.")
+    }
+    return mockedFeatures()
   }
 
   // swiftlint:disable:next function_parameter_count

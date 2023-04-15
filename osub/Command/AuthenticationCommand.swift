@@ -257,14 +257,6 @@ extension AuthenticationStatusCommand {
   }
 
   enum Field: String, FormattingField {
-    case allowedDownloads = "allowed_downloads"
-    case downloadsCount = "downloads_count"
-    case extInstalled = "ext_installed"
-    case level
-    case remainingDownloads = "remaining_downloads"
-    case userID = "user_id"
-    case vip
-
     static var defaultValues: [Self] {
       [
         .userID,
@@ -273,6 +265,14 @@ extension AuthenticationStatusCommand {
         .level
       ]
     }
+
+    case allowedDownloads = "allowed_downloads"
+    case downloadsCount = "downloads_count"
+    case extInstalled = "ext_installed"
+    case level
+    case remainingDownloads = "remaining_downloads"
+    case userID = "user_id"
+    case vip
 
     var text: String {
       switch self {

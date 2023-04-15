@@ -9,10 +9,210 @@ struct SearchCommand: AsyncParsableCommand {
     commandName: "search",
     abstract: "Search for subtitles.",
     subcommands: [
+      SearchFeaturesCommand.self,
       SearchSubtitlesCommand.self
     ],
     defaultSubcommand: SearchSubtitlesCommand.self
   )
+}
+
+struct SearchFeaturesCommand: AsyncParsableCommand {
+  static let configuration = CommandConfiguration(
+    commandName: "features",
+    abstract: "Search for features.",
+    usage: "osub search features <options>"
+  )
+
+  @OptionGroup(title: "Query Options")
+  var query: QueryOptions
+
+  @OptionGroup(title: "Formatting Options")
+  var formatting: FormattingOptions<Field>
+
+  var output = StandardTextOutputStream.shared
+  var configManager: ConfigurationManagerProtocol = ConfigurationManager.shared
+  var stateManager: StateManagerProtocol = StateManager.shared
+  var client: ClientProtocol = Client.shared
+
+  mutating func run() async throws {
+    try configure()
+    try await action()
+  }
+
+  func configure() throws {
+    let config = try configManager.load()
+    let state = try stateManager.load()
+    client.configure(config: config, state: state)
+  }
+
+  // swiftlint:disable:next cyclomatic_complexity
+  mutating func action() async throws {
+    let features = try await client.search.features(
+      featureID: query.featureID,
+      imdbID: query.imdbID,
+      query: query.query,
+      tmdbID: query.tmdbID,
+      type: query.type,
+      year: query.year
+    )
+
+    func normalize(number: Int?) -> String {
+      guard let number else {
+        return "00"
+      }
+      return number < 10 ? "0\(number)" : "\(number)"
+    }
+
+    var printer = formatting.printer(output: output)
+    features.data.enumerated().forEach { index, feature in
+      formatting.fields.forEach { field in
+        switch field {
+        case .episodeNumber:
+          printer.append(feature.attributes.episodeNumber)
+        case .featureID:
+          printer.append(feature.id)
+        case .featureType:
+          printer.append(feature.attributes.featureType)
+        case .imdbID:
+          printer.append(feature.attributes.imdbID)
+        case .index:
+          let season = normalize(number: feature.attributes.seasonNumber)
+          let episode = normalize(number: feature.attributes.episodeNumber)
+          printer.append("S\(season)E\(episode)")
+        case .parentIMDBID:
+          printer.append(feature.attributes.parentIMDBID)
+        case .parentTitle:
+          printer.append(feature.attributes.parentTitle)
+        case .seasonNumber:
+          printer.append(feature.attributes.seasonNumber)
+        case .title:
+          printer.append(feature.attributes.title)
+        case .tmdbID:
+          printer.append(feature.attributes.tmdbID)
+        case .year:
+          printer.append(feature.attributes.year)
+        }
+      }
+      if index < features.data.count - 1 {
+        printer.next()
+      }
+    }
+
+    print(
+      "\nPrinting \(features.data.count) features.\n",
+      to: &output
+    )
+    printer.print()
+  }
+}
+
+extension SearchFeaturesCommand {
+  enum CodingKeys: CodingKey {
+    case query
+    case formatting
+  }
+
+  struct QueryOptions: ParsableArguments {
+    @Option(
+      help: ArgumentHelp(
+        "Search by feature ID.",
+        valueName: .int
+      )
+    )
+    var featureID: Int?
+
+    @Option(
+      help: ArgumentHelp(
+        "Search by feature IMDB ID.",
+        valueName: .string
+      )
+    )
+    var imdbID: String?
+
+    @Option(
+      help: ArgumentHelp(
+        "Search by file name or string query.",
+        valueName: .string
+      )
+    )
+    var query: String?
+
+    @Option(
+      help: ArgumentHelp(
+        "Search by feature TMDB ID.",
+        valueName: .string
+      )
+    )
+    var tmdbID: Int?
+
+    @Option(
+      help: ArgumentHelp(
+        "Search on feature type.",
+        valueName: .enum
+      )
+    )
+    var type: SearchServiceType?
+
+    @Option(
+      help: ArgumentHelp(
+        "Search by year.",
+        valueName: .int
+      )
+    )
+    var year: Int?
+  }
+
+  enum Field: String, FormattingField {
+    static var defaultValues: [SearchFeaturesCommand.Field] {
+      [
+        .featureID,
+        .title,
+        .featureType,
+        .imdbID,
+        .index,
+        .parentTitle
+      ]
+    }
+
+    case episodeNumber = "episode_number"
+    case featureID = "feature_id"
+    case featureType = "feature_type"
+    case imdbID = "imdb_id"
+    case index
+    case parentIMDBID = "parent_imdb_id"
+    case parentTitle = "parent_title"
+    case seasonNumber = "season_number"
+    case title
+    case tmdbID = "tmdb_id"
+    case year
+
+    var text: String {
+      switch self {
+      case .episodeNumber:
+        return "episode number"
+      case .featureID:
+        return "feature id"
+      case .featureType:
+        return "feature type"
+      case .imdbID:
+        return "imdb id"
+      case .index:
+        return rawValue
+      case .parentIMDBID:
+        return "parent imdb id"
+      case .parentTitle:
+        return "parent title"
+      case .seasonNumber:
+        return "season number"
+      case .title:
+        return rawValue
+      case .tmdbID:
+        return "tmdb id"
+      case .year:
+        return rawValue
+      }
+    }
+  }
 }
 
 struct SearchSubtitlesCommand: AsyncParsableCommand {
@@ -521,6 +721,16 @@ extension SearchSubtitlesCommand {
 }
 
 // MARK: Extensions
+
+extension SearchServiceType: CaseIterable, ExpressibleByArgument {
+  public static var allCases: [SearchServiceType] {
+    [
+      .episode,
+      .movie,
+      .tvshow
+    ]
+  }
+}
 
 extension SearchSubtitlesAITranslated: CaseIterable, ExpressibleByArgument {
   public static var allCases: [SearchSubtitlesAITranslated] {

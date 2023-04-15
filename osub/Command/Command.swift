@@ -1,7 +1,7 @@
 import ArgumentParser
-import Foundation
 import Client
 import Configuration
+import Foundation
 import State
 import TablePrinter
 
