@@ -5,6 +5,28 @@ import TestCase
 import XCTest
 
 final class InformationServiceTests: URLProtocolTestCase {
+  func testFormats() async throws {
+    let url = URL(string: "http://localhost/infos/formats")
+    let data = """
+      {
+        "data": {
+          "output_formats": [
+            "srt"
+          ]
+        }
+      }
+      """
+      .data(using: .utf8)
+    let response = HTTPURLResponse(url: url, statusCode: 200)
+    MockedURLProtocol.urls[url] = (data, response, nil)
+
+    let client = Client(session: MockedURLProtocol.session)
+    client.configure(baseURL: URL(string: "http://localhost/"))
+    let service = InformationService(client: client)
+    let formats = try await service.formats()
+    XCTAssertEqual(formats.data.outputFormats, ["srt"])
+  }
+
   func testLanguages() async throws {
     let url = URL(string: "http://localhost/infos/languages")
     let data = """

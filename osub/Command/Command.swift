@@ -13,6 +13,7 @@ public struct Command: AsyncParsableCommand {
       AuthenticationCommand.self,
       ConfigurationCommand.self,
       DownloadCommand.self,
+      FormatsCommand.self,
       HashCommand.self,
       LanguagesCommand.self,
       SearchCommand.self,
