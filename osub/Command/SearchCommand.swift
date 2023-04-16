@@ -375,8 +375,11 @@ struct SearchSubtitlesCommand: AsyncParsableCommand {
       if entity.attributes.files.isEmpty {
         resolve(entity: entity)
       } else {
-        entity.attributes.files.forEach { file in
+        entity.attributes.files.enumerated().forEach { index, file in
           resolve(entity: entity, file: file)
+          if index < entity.attributes.files.count - 1 {
+            printer.next()
+          }
         }
       }
       if index < subtitles.data.count - 1 {
