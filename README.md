@@ -55,7 +55,7 @@ Feel free to open an [issue](https://github.com/vanyauhalin/osub/issues), create
     - [`osub search subtitles`](#osub-search-subtitles)
   - [Download subtitles](#download-subtitles)
     - [`osub download`](#osub-download)
-  - [Manage utilities](#manage-utilities)
+  - [Utility commands](#utility-commands)
     - [`osub formats`](#osub-formats)
     - [`osub hash`](#osub-hash)
     - [`osub languages`](#osub-languages)
