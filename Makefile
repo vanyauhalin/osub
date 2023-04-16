@@ -1,6 +1,6 @@
 .PHONY: build clean dev help install lint test version
 
-BUILD_VERSION := 0.2.0
+BUILD_VERSION := 0.3.0
 MAKEFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 MAKEFILE_DIR := $(dir $(MAKEFILE_PATH))
 
